@@ -15,7 +15,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.AccessToken;
 import com.facebook.AccessTokenTracker;
@@ -38,7 +38,6 @@ import com.google.android.gms.wearable.Wearable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -69,20 +68,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
 
         mLoginButton = (LoginButton) findViewById(R.id.login_button);
-        List<String> permissionNeeds = Arrays.asList("user_photos", "email", "user_birthday", "public_profile");
+        List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books","user_actions.music",
+                "user_education_history", "user_games_activity", "user_hometown", "user_location", "user_tagged_places",
+                "user_work_history","user_photos", "public_profile");
         mLoginButton.setReadPermissions(permissionNeeds);
 
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
                 System.out.println("onSuccess");
+                final JSONObject userINFO = new JSONObject();
 
-                //get user id, required information, facebok
-
-                // TODO: 2/24/16  can't get token now
+                //get accessToken
                 mAccessToken = AccessToken.getCurrentAccessToken();
-                System.out.println("userid:"+mAccessToken.getUserId());
-                System.out.println(mAccessToken.getToken());
+                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
 
 //                //Save access Token and required information in .xml file
 //                SharedPreferences mPreferences = getSharedPreferences("UserInfo", Context.MODE_WORLD_READABLE);
@@ -92,27 +91,75 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //                mEditor.putString("LastRefresh", mAccessToken.getLastRefresh().toString());
 //                mEditor.commit();
 
-                // Instantiate the RequestQueue.
-                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-                String url = "http://intersectionserver-1232.appspot.com/hello/loginsuccess";
 
-                // Request a string response from the provided URL.
-                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                        new Response.Listener<String>() {
-                            @Override
-                            public void onResponse(String response) {
-                                // Display the first 500 characters of the response string.
-                                System.out.println(response);
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
+                //get a list of installed apps
+                // TODO: 2/28/16 get app's category,http://wheredatapp.com/
+                final PackageManager pm = getPackageManager();
 
+                List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+                ArrayList<ApplicationInfo> userInstalled = new ArrayList<ApplicationInfo>();
+
+                final ArrayList<String> appList = new ArrayList<String>();
+                ArrayList<String> packagelist = new ArrayList<String>();
+
+                for (ApplicationInfo p : packages) {
+                    if((p.flags & ApplicationInfo.FLAG_SYSTEM) != 1)
+                    {
+                        userInstalled.add(p);
+                        packagelist.add(p.packageName);
+                        System.out.println(p.packageName);
+                        appList.add(pm.getApplicationLabel(p).toString());
                     }
-                });
+                }
 
-                // Add the request to the RequestQueue.
-                queue.add(stringRequest);
+//                //send it to http://api.wheredatapp.com/data
+//                String appurl = "http://api.wheredatapp.com/data";
+//                JsonObjectRequest req = new JsonObjectRequest(appurl, userINFO,
+//                        new Response.Listener<JSONObject>() {
+//                            @Override
+//                            public void onResponse(JSONObject response) {
+//                                System.out.println(response.toString());
+//                            }
+//                        }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        VolleyLog.e("Error: ", error.getMessage());
+//                    }
+//                });
+//
+//
+//                // Instantiate the RequestQueue.
+//                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+//                String url = "http://intersectionserver-1232.appspot.com/register";
+//
+//                // Request a string response from the provided URL.
+//                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+//                        new Response.Listener<String>() {
+//                            @Override
+//                            public void onResponse(String response) {
+//                                // Display the first 500 characters of the response string.
+//                                System.out.println(response);
+//                            }
+//                        }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//
+//                    }
+//                });
+//
+//                // Add the request to the RequestQueue.
+//                queue.add(stringRequest);
+
+
+
+                try {
+                    userINFO.put("FacebookID",mAccessToken.getUserId());
+                    userINFO.put("AccessToken",mAccessToken.getToken());
+                    userINFO.put("Installed App",appList);
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
 
                 //get photo url
                 new GraphRequest(
@@ -122,58 +169,86 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                         HttpMethod.GET,
                         new GraphRequest.Callback() {
                             public void onCompleted(GraphResponse response) {
-                                if (response != null)
+                                if (response != null) {
                                     try {
-                                        URL imgUrl = new URL("https://graph.facebook.com/"
-                                                + mAccessToken.getUserId() + "/picture?type=large");
-                                        System.out.println(imgUrl.toString());
+                                        String imgUrl ="https://graph.facebook.com/"
+                                                + mAccessToken.getUserId() + "/picture?type=large";
+                                        userINFO.put("photo URL", imgUrl);
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
+                                }
+                                GraphRequest requestMe = GraphRequest.newMeRequest(
+                                        mAccessToken,
+                                        new GraphRequest.GraphJSONObjectCallback() {
+                                            @Override
+                                            public void onCompleted(
+                                                    JSONObject object,
+                                                    GraphResponse response) {
+
+                                                try {
+                                                    userINFO.put("FBinfo",object);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+                                                System.out.println(userINFO.toString());
+
+                                                String appurl = "http://intersectionserver-1232.appspot.com/upload_gps/ddddd";
+                                                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,appurl, userINFO,
+                                                        new Response.Listener<JSONObject>() {
+                                                            @Override
+                                                            public void onResponse(JSONObject response) {
+                                                                System.out.println(response.toString());
+                                                            }
+                                                        }, new Response.ErrorListener() {
+                                                    @Override
+                                                    public void onErrorResponse(VolleyError error) {
+                                                        System.out.println(error);
+                                                    }
+                                                });
+                                                queue.add(req);
+                                            }
+                                        });
+                                Bundle parameters = new Bundle();
+                                parameters.putString("fields", "name,gender,location,hometown,education,work,tagged_places,music,books");
+                                requestMe.setParameters(parameters);
+                                requestMe.executeAsync();
                             }
                         }
                 ).executeAsync();
 
-                //list installed apps
-                final PackageManager pm = getPackageManager();
-                //get a list of installed apps.
-//                List<PackageInfo> packages = pm.getInstalledPackages(PackageManager.GET_META_DATA);
-//                ArrayList<PackageInfo> userInstalled = new ArrayList<PackageInfo>();
 
-                List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-                ArrayList<ApplicationInfo> userInstalled = new ArrayList<ApplicationInfo>();
-
-                ArrayList<String> appList = new ArrayList<String>();
-//                for (PackageInfo p : packages) {
-//                    if(p.versionName!=null && ((p.applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 1))
-//                    {
-//                        userInstalled.add(p);
-//                        appList.add(p.packageName);
-//                        System.out.println("Installed package :" + p.applicationInfo);
+//                //batched request of facebook
+//                GraphRequestBatch batch = new GraphRequestBatch(
+//
+//                );
+//                batch.addCallback(new GraphRequestBatch.Callback() {
+//                    @Override
+//                    public void onBatchCompleted(GraphRequestBatch graphRequests) {
+//                        System.out.println(graphRequests.toString());
 //                    }
-//                }
+//                });
+//                batch.executeAsync();
 
-                JSONObject JSONappList = new JSONObject();
 
-                for (ApplicationInfo p : packages) {
-                    if((p.flags & ApplicationInfo.FLAG_SYSTEM) != 1)
-                    {
-                        userInstalled.add(p);
-
-                        try {
-                            JSONappList.accumulate("packages", p.packageName);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        appList.add(pm.getApplicationLabel(p).toString());
-                        System.out.println("Installed package :" + pm.getApplicationLabel(p).toString());
-                    }
-                }
-
-                System.out.println(JSONappList);
-
+//                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,appurl, userINFO,
+//                        new Response.Listener<JSONObject>() {
+//                            @Override
+//                            public void onResponse(JSONObject response) {
+//                                System.out.println("sss"+response.toString());
+//                            }
+//                        }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//                        System.out.println(error);
+//                    }
+////                });
+//
+//                queue.add(req);
             }
+
+
+
 
             @Override
             public void onCancel() {
