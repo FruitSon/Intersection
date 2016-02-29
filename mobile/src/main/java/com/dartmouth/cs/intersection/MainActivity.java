@@ -28,6 +28,12 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.Node;
+import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -37,7 +43,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private boolean userSkippedLogin = false;
     private AccessTokenTracker mAccessTokenTracker;
@@ -48,6 +54,9 @@ public class MainActivity extends AppCompatActivity {
     private CallbackManager mCallbackManager;
     private AccessToken mAccessToken;
     private boolean isLogged = false;
+
+    //Mobile - wear connection
+    private GoogleApiClient mApiClient;
 
 
     @Override
@@ -192,7 +201,8 @@ public class MainActivity extends AppCompatActivity {
 //
 //        //check whether it's the first time of login, if not, show main page
 
-
+        //Send Message to wearable devices
+        initGoogleApiClient();
     }
 
     @Override
@@ -212,7 +222,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mApiClient.disconnect();
+    }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data)
@@ -229,6 +243,51 @@ public class MainActivity extends AppCompatActivity {
 //
 //        ft.add(R.id.main, mainPage);
 //        fm.beginTransaction().show(mainPage).commit();
+    }
+
+    private void initGoogleApiClient() {
+        mApiClient = new GoogleApiClient.Builder( this )
+                .addApi( Wearable.API )
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        mApiClient.connect();
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        sendMessage("/connected", "test msg");
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+        Log.d("12313123", i + "");
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
+        Log.e("test", "Failed to connect to Google API Client");
+    }
+
+    private void sendMessage( final String path, final String text ) {
+        new Thread( new Runnable() {
+            @Override
+            public void run() {
+                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( mApiClient ).await();
+                for(Node node : nodes.getNodes()) {
+                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
+                            mApiClient, node.getId(), path, text.getBytes() ).await();
+                }
+
+                runOnUiThread( new Runnable() {
+                    @Override
+                    public void run() {
+
+                    }
+                });
+            }
+        }).start();
     }
 }
 
