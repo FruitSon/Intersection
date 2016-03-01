@@ -1,6 +1,5 @@
 package com.dartmouth.cs.intersection;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
@@ -96,6 +95,13 @@ public class BindFBActivity extends WearableActivity implements MessageApi.Messa
                     byte[] bb = messageEvent.getData();
                     try {
                         Log.d("Wear received", new String(bb, "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }else{
+                    byte[] bb = messageEvent.getData();
+                    try {
+                        Log.d("UserID received", new String(bb, "UTF-8"));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
