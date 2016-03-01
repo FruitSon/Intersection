@@ -5,12 +5,21 @@ import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.RequestQueue;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
+import com.android.volley.toolbox.StringRequest;
+import com.android.volley.toolbox.Volley;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
+
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 
@@ -26,6 +35,25 @@ public class BindFBActivity extends WearableActivity implements MessageApi.Messa
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bindfb);
 
+        String userid = "";
+        RequestQueue requestQueue = Volley.newRequestQueue(this);
+        String url = "http://intersectionserver-1232.appspot.com/has_matched/"+userid;
+
+
+        StringRequest res = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        System.out.println(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println(error);
+            }
+        });
+        requestQueue.add(res);
+
         initGoogleApiClient();
 
         /*SharedPreferences preferences = getSharedPreferences("settings", 0);
@@ -33,6 +61,9 @@ public class BindFBActivity extends WearableActivity implements MessageApi.Messa
 
         editor.putInt("SettingSteps", 1);
         editor.commit();*/
+
+
+
     }
 
     private void initGoogleApiClient() {
