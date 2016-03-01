@@ -6,11 +6,14 @@ import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.Toast;
 
 /**
  * Created by _ReacTor on 16/2/22.
  */
 public class FeaturesActivity extends WearableActivity {
+    private static int selectedFeatures = 0;
 
     private Button confirmBtn;
     @Override
@@ -38,5 +41,20 @@ public class FeaturesActivity extends WearableActivity {
                 }
             }
         });
+    }
+
+    public void OnCheckBoxClicked(View v){
+        CheckBox checkBox = (CheckBox) v;
+        if(!checkBox.isChecked()){
+            selectedFeatures --;
+            return;
+        }
+
+        if(selectedFeatures < 3) {
+            selectedFeatures++;
+        }else{
+            Toast.makeText(this, "Limit Reached", Toast.LENGTH_LONG);
+            checkBox.toggle();
+        }
     }
 }
