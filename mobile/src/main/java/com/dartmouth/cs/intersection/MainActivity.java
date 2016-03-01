@@ -1,15 +1,11 @@
 package com.dartmouth.cs.intersection;
 
-import android.app.FragmentManager;
-import android.app.FragmentTransaction;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.view.View;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -35,6 +31,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -76,8 +73,20 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
-                System.out.println("onSuccess");
+
+                //initialize userINFO
                 final JSONObject userINFO = new JSONObject();
+
+                try {
+                    userINFO.put("FacebookID","");
+                    userINFO.put("AccessToken","");
+                    userINFO.put("Installed App",new JSONArray());
+                    userINFO.put("photo URL","");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(userINFO);
 
                 //get accessToken
                 mAccessToken = AccessToken.getCurrentAccessToken();
@@ -97,17 +106,15 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 final PackageManager pm = getPackageManager();
 
                 List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-                ArrayList<ApplicationInfo> userInstalled = new ArrayList<ApplicationInfo>();
 
                 final ArrayList<String> appList = new ArrayList<String>();
                 ArrayList<String> packagelist = new ArrayList<String>();
 
                 for (ApplicationInfo p : packages) {
-                    if((p.flags & ApplicationInfo.FLAG_SYSTEM) != 1)
-                    {
-                        userInstalled.add(p);
+                    if ((p.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
+                        //packageName
                         packagelist.add(p.packageName);
-                        System.out.println(p.packageName);
+                        //ApplicationName
                         appList.add(pm.getApplicationLabel(p).toString());
                     }
                 }
@@ -150,12 +157,10 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 //                // Add the request to the RequestQueue.
 //                queue.add(stringRequest);
 
-
-
                 try {
-                    userINFO.put("FacebookID",mAccessToken.getUserId());
-                    userINFO.put("AccessToken",mAccessToken.getToken());
-                    userINFO.put("Installed App",appList);
+                    userINFO.put("FacebookID", mAccessToken.getUserId());
+                    userINFO.put("AccessToken", mAccessToken.getToken());
+                    userINFO.put("Installed App", appList);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -171,7 +176,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             public void onCompleted(GraphResponse response) {
                                 if (response != null) {
                                     try {
-                                        String imgUrl ="https://graph.facebook.com/"
+                                        String imgUrl = "https://graph.facebook.com/"
                                                 + mAccessToken.getUserId() + "/picture?type=large";
                                         userINFO.put("photo URL", imgUrl);
                                     } catch (Exception e) {
@@ -187,14 +192,30 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                                     GraphResponse response) {
 
                                                 try {
-                                                    userINFO.put("FBinfo",object);
+                                                    if( !object.has("gender")) object.put("gender", "") ;
+                                                    if( !object.has("tagged_places")) object.put("tagged_places", new JSONArray()) ;
+                                                    if( !object.has("music")) object.put("music", new JSONObject().put("data",new JSONArray())) ;
+                                                    if( !object.has("books")) object.put("books", new JSONObject().put("data",new JSONArray())) ;
+                                                    if( !object.has("hometown")) object.put("hometown", new JSONObject()) ;
+                                                    if( !object.has("education")) object.put("education", new JSONArray()) ;
+                                                    if( !object.has("work")) object.put("work", new JSONArray()) ;
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();
                                                 }
+
+                                                System.out.println(object);
+
+
+                                                try {
+                                                    userINFO.put("FBinfo", object);
+                                                } catch (JSONException e) {
+                                                    e.printStackTrace();
+                                                }
+
                                                 System.out.println(userINFO.toString());
 
-                                                String appurl = "http://intersectionserver-1232.appspot.com/upload_gps/ddddd";
-                                                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,appurl, userINFO,
+                                                String appurl = "http://intersectionserver-1232.appspot.com/register";
+                                                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, appurl, userINFO,
                                                         new Response.Listener<JSONObject>() {
                                                             @Override
                                                             public void onResponse(JSONObject response) {
@@ -207,6 +228,13 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                                                     }
                                                 });
                                                 queue.add(req);
+
+                                                //Send Message to wearable devices
+                                                initGoogleApiClient();
+
+                                                //start GPS service
+                                                //start update GPS service
+
                                             }
                                         });
                                 Bundle parameters = new Bundle();
@@ -216,39 +244,84 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                             }
                         }
                 ).executeAsync();
-
-
+//                Bundle parameters = new Bundle();
+//                parameters.putString("fields", "name,gender,location,hometown,education,work,tagged_places,music,books");
+//
+//                GraphRequest.newMeRequest(
+//                        mAccessToken,
+//                        new GraphRequest.GraphJSONObjectCallback() {
+//                            @Override
+//                            public void onCompleted(
+//                                    JSONObject jsonObject,
+//                                    GraphResponse response) {
+//                                try {
+//                                    userINFO.put("FBinfo",jsonObject);
+//                                } catch (JSONException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                System.out.println(userINFO.toString());
+//                            }
+//                        }).setParameters(parameters);
+//
 //                //batched request of facebook
 //                GraphRequestBatch batch = new GraphRequestBatch(
-//
+//                        new GraphRequest(
+//                                AccessToken.getCurrentAccessToken(),
+//                                "/{user-id}/picture",
+//                                null,
+//                                HttpMethod.GET,
+//                                new GraphRequest.Callback() {
+//                                    public void onCompleted(GraphResponse response) {
+//                                        if (response != null)
+//                                            try {
+//                                                String imgUrl ="https://graph.facebook.com/"
+//                                                        + mAccessToken.getUserId() + "/picture?type=large";
+//                                                userINFO.put("photo URL", imgUrl);
+//                                            } catch (Exception e) {
+//                                                e.printStackTrace();
+//                                            }
+//                                    }
+//                                }),
+//                        GraphRequest.newMeRequest(
+//                                mAccessToken,
+//                                new GraphRequest.GraphJSONObjectCallback() {
+//                                    @Override
+//                                    public void onCompleted(
+//                                            JSONObject jsonObject,
+//                                            GraphResponse response) {
+//                                    }
+//                                })
 //                );
+//
 //                batch.addCallback(new GraphRequestBatch.Callback() {
 //                    @Override
 //                    public void onBatchCompleted(GraphRequestBatch graphRequests) {
-//                        System.out.println(graphRequests.toString());
+//                        System.out.println("batch"+graphRequests.toString());
+//                        try {
+//                            userINFO.put("FBinf0",graphRequests);
+//                        } catch (JSONException e) {
+//                            e.printStackTrace();
+//                        }
+//
+//                        String appurl = "http://intersectionserver-1232.appspot.com/upload_gps/ddddd";
+//                        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,appurl, userINFO,
+//                                new Response.Listener<JSONObject>() {
+//                                    @Override
+//                                    public void onResponse(JSONObject response) {
+//                                        System.out.println(response.toString());
+//                                    }
+//                                }, new Response.ErrorListener() {
+//                            @Override
+//                            public void onErrorResponse(VolleyError error) {
+//                                System.out.println(error);
+//                            }
+//                        });
+//                        queue.add(req);
 //                    }
+//
 //                });
 //                batch.executeAsync();
-
-
-//                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,appurl, userINFO,
-//                        new Response.Listener<JSONObject>() {
-//                            @Override
-//                            public void onResponse(JSONObject response) {
-//                                System.out.println("sss"+response.toString());
-//                            }
-//                        }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        System.out.println(error);
-//                    }
-////                });
-//
-//                queue.add(req);
             }
-
-
-
 
             @Override
             public void onCancel() {
@@ -263,37 +336,28 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
         });
 
-        mLoginButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showMoreInfo();
-            }
-        });
-
 //        //read access token from storage
 //        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_PRIVATE);
 //        String recordedAccessToken = sharedPreferences.getString("AccessToken", "-1");
-//
-//        //check whether it's the first time of login, if not, show main page
 
-        //Send Message to wearable devices
-        initGoogleApiClient();
     }
 
     @Override
     protected void onResume(){
         super.onResume();
 
-        //read access token from storage
-        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_PRIVATE);
-        String recordedAccessToken = sharedPreferences.getString("AccessToken", "-1");
+        //TODO: 2/29/16 check if the first time of login
 
-        System.out.println(recordedAccessToken);
-
-        //check whether it's the first time of login, if not, show main page
-        if(recordedAccessToken!="-1"){
-            showMoreInfo();
-        }
+//        //read access token from storage
+//        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_PRIVATE);
+//        String recordedAccessToken = sharedPreferences.getString("AccessToken", "-1");
+//
+//        System.out.println(recordedAccessToken);
+//
+//        //check whether it's the first time of login, if not, show main page
+//        if(recordedAccessToken!="-1"){
+//            showMoreInfo();
+//        }
 
     }
 
@@ -308,16 +372,6 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     {
         super.onActivityResult(requestCode, resultCode, data);
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
-    }
-
-    public void showMoreInfo(){
-        mainPage = new MainFragment();
-
-        FragmentManager fm = getFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-//
-//        ft.add(R.id.main, mainPage);
-//        fm.beginTransaction().show(mainPage).commit();
     }
 
     private void initGoogleApiClient() {
