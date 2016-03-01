@@ -27,6 +27,7 @@ import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
+import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
@@ -35,11 +36,13 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class MainActivity extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private boolean userSkippedLogin = false;
     private AccessTokenTracker mAccessTokenTracker;
@@ -50,6 +53,7 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
     private CallbackManager mCallbackManager;
     private AccessToken mAccessToken;
     private boolean isLogged = false;
+    private final String WEAR_MESSAGE_PATH = "/connected";
 
     //Mobile - wear connection
     private GoogleApiClient mApiClient;
@@ -386,6 +390,8 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
 
     @Override
     public void onConnected(Bundle bundle) {
+
+        Wearable.MessageApi.addListener( mApiClient, this );
         sendMessage("/connected", "test msg");
     }
 
@@ -417,6 +423,23 @@ public class MainActivity extends AppCompatActivity implements GoogleApiClient.C
                 });
             }
         }).start();
+    }
+
+    @Override
+    public void onMessageReceived(final MessageEvent messageEvent) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (messageEvent.getPath().equalsIgnoreCase(WEAR_MESSAGE_PATH)) {
+                    byte[] bb = messageEvent.getData();
+                    try {
+                        Log.d("Wear received", new String(bb, "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
     }
 }
 

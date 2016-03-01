@@ -5,7 +5,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
-import android.widget.Button;
+import android.widget.ImageButton;
 
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.RadarChart;
@@ -25,7 +25,7 @@ import java.util.ArrayList;
  */
 public class LikeOrNotActivity extends WearableActivity {
 
-    private Button likeBtn;
+    private ImageButton likeBtn;
     private RadarChart mChart;
 
     @Override
@@ -38,9 +38,9 @@ public class LikeOrNotActivity extends WearableActivity {
 
         mChart.setDescription("");
 
-        mChart.setWebLineWidth(1.5f);
+        /*mChart.setWebLineWidth(1.5f);
         mChart.setWebLineWidthInner(0.75f);
-        mChart.setWebAlpha(100);
+        mChart.setWebAlpha(100);*/
 
 
         // set the marker to the chart
@@ -60,12 +60,12 @@ public class LikeOrNotActivity extends WearableActivity {
         yAxis.setTextSize(9f);
         yAxis.setAxisMinValue(0f);*/
 
-        Legend l = mChart.getLegend();
+        /*Legend l = mChart.getLegend();
         l.setPosition(Legend.LegendPosition.RIGHT_OF_CHART);
-        l.setXEntrySpace(7f);
+        l.setXEntrySpace(7f);*/
         //l.setYEntrySpace(5f);
 
-        likeBtn = (Button) findViewById(R.id.button_like);
+        likeBtn = (ImageButton) findViewById(R.id.button_like);
 
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -89,7 +89,7 @@ public class LikeOrNotActivity extends WearableActivity {
     }
 
     private String[] mParties = new String[]{
-            "Exercise", "LifeStyle", "Hobby", "Place", "Belief"
+            "Sports", "LifeStyle", "Hobby", "Facebook", "Location"
     };
 
     private void setData() {
@@ -127,6 +127,7 @@ public class LikeOrNotActivity extends WearableActivity {
         data.setDrawValues(false);
 
         mChart.setData(data);
+        mChart.getYAxis().setEnabled(!mChart.getYAxis().isEnabled());
 
         mChart.invalidate();
     }
