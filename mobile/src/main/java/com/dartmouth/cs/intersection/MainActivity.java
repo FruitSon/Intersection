@@ -37,7 +37,6 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -52,7 +51,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
     protected LoginButton mLoginButton;
     private CallbackManager mCallbackManager;
     private AccessToken mAccessToken;
-    private boolean isLogged = false;
+    private String user_id = "";
     private final String WEAR_MESSAGE_PATH = "/connected";
 
     //Mobile - wear connection
@@ -224,6 +223,11 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                             @Override
                                                             public void onResponse(JSONObject response) {
                                                                 System.out.println(response.toString());
+                                                                try {
+                                                                    user_id = response.getJSONObject("user_id").toString();
+                                                                } catch (JSONException e) {
+                                                                    e.printStackTrace();
+                                                                }
                                                             }
                                                         }, new Response.ErrorListener() {
                                                     @Override
@@ -232,6 +236,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                     }
                                                 });
                                                 queue.add(req);
+
 
                                                 //Send Message to wearable devices
                                                 initGoogleApiClient();
@@ -392,7 +397,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
     public void onConnected(Bundle bundle) {
 
         Wearable.MessageApi.addListener( mApiClient, this );
-        sendMessage("/connected", "test msg");
+        sendMessage("/loginsuccess", user_id);
     }
 
     @Override
