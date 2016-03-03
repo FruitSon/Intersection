@@ -1,6 +1,8 @@
 package com.dartmouth.cs.intersection;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -11,6 +13,7 @@ import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
 import com.facebook.AccessToken;
@@ -54,6 +57,11 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
     private String user_id = "";
     private final String WEAR_MESSAGE_PATH = "/connected";
 
+
+    private Scheduler GPSscheduler;
+    private Scheduler POLLINGscheduler;
+
+
     //Mobile - wear connection
     private GoogleApiClient mApiClient;
 
@@ -68,9 +76,10 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
 
 
         mLoginButton = (LoginButton) findViewById(R.id.login_button);
-        List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books","user_actions.music",
-                "user_education_history", "user_games_activity", "user_hometown", "user_location", "user_tagged_places",
-                "user_work_history","user_photos", "public_profile");
+        List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books",
+                "user_actions.music", "user_education_history", "user_games_activity",
+                "user_hometown", "user_location", "user_tagged_places", "user_work_history",
+                "user_photos", "public_profile");
         mLoginButton.setReadPermissions(permissionNeeds);
 
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -111,31 +120,43 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                 List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
                 final ArrayList<String> appList = new ArrayList<String>();
-                ArrayList<String> packagelist = new ArrayList<String>();
+                JSONArray packagelist = new JSONArray();
 
                 for (ApplicationInfo p : packages) {
                     if ((p.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
                         //packageName
-                        packagelist.add(p.packageName);
+                        packagelist.put(p.packageName);
                         //ApplicationName
                         appList.add(pm.getApplicationLabel(p).toString());
                     }
                 }
 
+                JSONObject packs = new JSONObject();
+                try {
+                    packs.put("packages",packagelist);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(packs);
+
 //                //send it to http://api.wheredatapp.com/data
-//                String appurl = "http://api.wheredatapp.com/data";
-//                JsonObjectRequest req = new JsonObjectRequest(appurl, userINFO,
-//                        new Response.Listener<JSONObject>() {
-//                            @Override
-//                            public void onResponse(JSONObject response) {
-//                                System.out.println(response.toString());
-//                            }
-//                        }, new Response.ErrorListener() {
-//                    @Override
-//                    public void onErrorResponse(VolleyError error) {
-//                        VolleyLog.e("Error: ", error.getMessage());
-//                    }
-//                });
+                String key = "438e3a19ff29c8df9fa44e3381d29e347460ca66bba8c46846739925";
+                String appurl = "http://api.wheredatapp.com/data?key="+key;
+                JsonObjectRequest appreq = new JsonObjectRequest(Request.Method.POST, appurl, packs,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                System.out.println(response);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        VolleyLog.e(error.toString());
+                    }
+                });
+
+                queue.add(appreq);
 //
 //
 //                // Instantiate the RequestQueue.
@@ -182,6 +203,8 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                         String imgUrl = "https://graph.facebook.com/"
                                                 + mAccessToken.getUserId() + "/picture?type=large";
                                         userINFO.put("photo URL", imgUrl);
+                                        System.out.println("url"+response.toString());
+
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -207,6 +230,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                 }
 
                                                 System.out.println(object);
+                                                System.out.println("Feedback from fb"+response.toString());
 
 
                                                 try {
@@ -215,19 +239,34 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                     e.printStackTrace();
                                                 }
 
-                                                System.out.println(userINFO.toString());
+                                                System.out.println("FBinfo"+object.toString());
+                                                System.out.println("userINFO"+userINFO.toString());
 
-                                                String appurl = "http://intersectionserver-1232.appspot.com/register";
-                                                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, appurl, userINFO,
+                                                String serverurl =
+                                                        "http://intersectionserver-1232.appspot.com/register";
+                                                JsonObjectRequest req = new JsonObjectRequest(
+                                                        Request.Method.POST, serverurl, userINFO,
                                                         new Response.Listener<JSONObject>() {
                                                             @Override
                                                             public void onResponse(JSONObject response) {
                                                                 System.out.println(response.toString());
                                                                 try {
-                                                                    user_id = response.getJSONObject("user_id").toString();
+                                                                    user_id = response.get("user_id").toString();
                                                                 } catch (JSONException e) {
                                                                     e.printStackTrace();
                                                                 }
+
+                                                                //Save user_id in .xml file
+                                                                SharedPreferences mPreferences
+                                                                        = getSharedPreferences
+                                                                        ("UserInfo", Context.MODE_WORLD_READABLE);
+                                                                SharedPreferences.Editor mEditor
+                                                                        = mPreferences.edit();
+
+                                                                mEditor.putString("user_id", user_id);
+                                                                mEditor.commit();
+
+                                                                System.out.println(user_id);
                                                             }
                                                         }, new Response.ErrorListener() {
                                                     @Override
@@ -241,95 +280,24 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                 //Send Message to wearable devices
                                                 initGoogleApiClient();
 
-                                                //start GPS service
-                                                //start update GPS service
+                                                //start update GPS service to server
+                                                GPSscheduler.setSchedule(getApplicationContext());
+
+                                                //start querying server, every 10 s
+                                                POLLINGscheduler.setSchedule(getApplicationContext(),10000);
+
 
                                             }
                                         });
                                 Bundle parameters = new Bundle();
-                                parameters.putString("fields", "name,gender,location,hometown,education,work,tagged_places,music,books");
+                                parameters.putString("fields", "name,gender,location,hometown," +
+                                        "education,work,tagged_places,music,books");
                                 requestMe.setParameters(parameters);
                                 requestMe.executeAsync();
                             }
                         }
                 ).executeAsync();
-//                Bundle parameters = new Bundle();
-//                parameters.putString("fields", "name,gender,location,hometown,education,work,tagged_places,music,books");
-//
-//                GraphRequest.newMeRequest(
-//                        mAccessToken,
-//                        new GraphRequest.GraphJSONObjectCallback() {
-//                            @Override
-//                            public void onCompleted(
-//                                    JSONObject jsonObject,
-//                                    GraphResponse response) {
-//                                try {
-//                                    userINFO.put("FBinfo",jsonObject);
-//                                } catch (JSONException e) {
-//                                    e.printStackTrace();
-//                                }
-//                                System.out.println(userINFO.toString());
-//                            }
-//                        }).setParameters(parameters);
-//
-//                //batched request of facebook
-//                GraphRequestBatch batch = new GraphRequestBatch(
-//                        new GraphRequest(
-//                                AccessToken.getCurrentAccessToken(),
-//                                "/{user-id}/picture",
-//                                null,
-//                                HttpMethod.GET,
-//                                new GraphRequest.Callback() {
-//                                    public void onCompleted(GraphResponse response) {
-//                                        if (response != null)
-//                                            try {
-//                                                String imgUrl ="https://graph.facebook.com/"
-//                                                        + mAccessToken.getUserId() + "/picture?type=large";
-//                                                userINFO.put("photo URL", imgUrl);
-//                                            } catch (Exception e) {
-//                                                e.printStackTrace();
-//                                            }
-//                                    }
-//                                }),
-//                        GraphRequest.newMeRequest(
-//                                mAccessToken,
-//                                new GraphRequest.GraphJSONObjectCallback() {
-//                                    @Override
-//                                    public void onCompleted(
-//                                            JSONObject jsonObject,
-//                                            GraphResponse response) {
-//                                    }
-//                                })
-//                );
-//
-//                batch.addCallback(new GraphRequestBatch.Callback() {
-//                    @Override
-//                    public void onBatchCompleted(GraphRequestBatch graphRequests) {
-//                        System.out.println("batch"+graphRequests.toString());
-//                        try {
-//                            userINFO.put("FBinf0",graphRequests);
-//                        } catch (JSONException e) {
-//                            e.printStackTrace();
-//                        }
-//
-//                        String appurl = "http://intersectionserver-1232.appspot.com/upload_gps/ddddd";
-//                        JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST,appurl, userINFO,
-//                                new Response.Listener<JSONObject>() {
-//                                    @Override
-//                                    public void onResponse(JSONObject response) {
-//                                        System.out.println(response.toString());
-//                                    }
-//                                }, new Response.ErrorListener() {
-//                            @Override
-//                            public void onErrorResponse(VolleyError error) {
-//                                System.out.println(error);
-//                            }
-//                        });
-//                        queue.add(req);
-//                    }
-//
-//                });
-//                batch.executeAsync();
+
             }
 
             @Override
@@ -396,8 +364,9 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
     @Override
     public void onConnected(Bundle bundle) {
 
-        Wearable.MessageApi.addListener( mApiClient, this );
+        Wearable.MessageApi.addListener(mApiClient, this);
         sendMessage("/loginsuccess", user_id);
+        System.out.println("connected" + user_id);
     }
 
     @Override

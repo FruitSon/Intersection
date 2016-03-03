@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">Intersection</string>
-    <string name="facebook_app_id">779530465485795</string>
+    <!--//grz-->
+    <!--<string name="facebook_app_id">1684422098464638</string>-->
+    //wwc
+    <string name="facebook_app_id">1560924900890928</string>
 
 
     <!-- TODO: Remove or change this placeholder text -->
