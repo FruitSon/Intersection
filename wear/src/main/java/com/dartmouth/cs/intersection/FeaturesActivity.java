@@ -36,11 +36,6 @@ public class FeaturesActivity extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_features);
 
-        SharedPreferences preferences = getSharedPreferences("settings", 0);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putInt("SettingSteps", 0);
-        editor.commit();
-
         startService(new Intent(this, MobileMsgService.class));
         MobileMsgService.sendMessage("/connected", "wear msg");
 

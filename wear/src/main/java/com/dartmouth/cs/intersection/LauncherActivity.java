@@ -32,8 +32,8 @@ public class LauncherActivity extends WearableActivity {
         SharedPreferences preferences = getSharedPreferences("settings", 0);
         SharedPreferences.Editor editor = preferences.edit();
 
-        /*editor.putInt("SettingSteps", 0);
-        editor.commit();*/
+        editor.putInt("SettingSteps", 0);
+        editor.commit();
 
         switch (preferences.getInt("SettingSteps", 0)){
             case 0:
