@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.CompoundButton;
+import android.widget.Switch;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -25,8 +27,17 @@ public class MainFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
 
-        getActivity().startService(new Intent(getActivity(), MobileMsgService.class));
-        MobileMsgService.sendMessage("/connected", "wear msg");
+        Switch sw = (Switch) view.findViewById(R.id.mode_switch);
+        sw.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    if(Global.GACConnected) {
+                        MobileMsgService.sendMessage("/pairopen", "on");
+                    }
+                }
+            }
+        });
 
         return view;
     }

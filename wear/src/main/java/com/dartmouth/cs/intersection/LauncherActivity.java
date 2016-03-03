@@ -33,9 +33,10 @@ public class LauncherActivity extends WearableActivity {
         mContainerView = (BoxInsetLayout) findViewById(R.id.container);
 
         SharedPreferences preferences = getSharedPreferences("settings", 0);
+        startService(new Intent(this, MobileMsgService.class));
         SharedPreferences.Editor editor = preferences.edit();
 
-        editor.putInt("SettingSteps", 0);
+        editor.putInt("SettingSteps", 4);
         editor.commit();
 
         switch (preferences.getInt("SettingSteps", 0)){
@@ -101,7 +102,11 @@ public class LauncherActivity extends WearableActivity {
 
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            MobileMsgService.sendMessage("/connected", "mobile msg");
+            //MobileMsgService.sendMessage("/connected", "mobile msg");
+            int step = intent.getIntExtra("step", 0);
+            if(step == 1){
+                startActivity(new Intent(LauncherActivity.this, FeaturesActivity.class));
+            }
         }
     }
 }

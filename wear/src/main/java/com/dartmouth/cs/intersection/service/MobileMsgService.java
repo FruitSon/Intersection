@@ -117,13 +117,27 @@ public class MobileMsgService extends WearableListenerService implements
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if (messageEvent.getPath().equalsIgnoreCase(TEST_CONNECT_PATH)) {
+                if(messageEvent.getPath().equalsIgnoreCase(Global.FB_CONNECTED)){
+                    //startActivity(new Intent(getApplicationContext(), FeaturesActivity.class));
+                    Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
+                    intent.putExtra("step", 1);
+                    sendBroadcast(intent);
+                } else if (messageEvent.getPath().equalsIgnoreCase(Global.VIBRATE)) {
+
+
 
                     int notificationId = 001;
                     String EXTRA_EVENT_ID = "1";
                     int eventId = 2;
-                    String eventTitle = "Hello";
-                    String eventLocation = "World";
+                    byte[] bb = messageEvent.getData();
+                    String eventTitle = "";
+                    try {
+                        eventTitle =  new String(bb, "UTF-8");
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
+                    }
+
+                    String eventLocation = "Hello";
                     // Build intent for notification content
                     Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
                     viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
@@ -145,12 +159,12 @@ public class MobileMsgService extends WearableListenerService implements
                     // Build the notification and issues it with notification manager.
                     notificationManager.notify(notificationId, notificationBuilder.build());
 
-                    byte[] bb = messageEvent.getData();
+                    /*byte[] bb = messageEvent.getData();
                     try {
                         Log.d("Wear received", new String(bb, "UTF-8"));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
-                    }
+                    }*/
                 }else{
 
                     /*int notificationId = 001;

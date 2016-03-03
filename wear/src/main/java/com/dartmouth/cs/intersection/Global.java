@@ -6,4 +6,7 @@ package com.dartmouth.cs.intersection;
 public class Global {
     public static String GAC_BROADCAST_FILTER = "GAC_BROADCAST_FILTER";
     public static boolean GACConnected = false;
+
+    public static String FB_CONNECTED = "/fbconnected";
+    public static String VIBRATE = "/vibrate";
 }

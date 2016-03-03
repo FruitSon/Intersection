@@ -40,10 +40,10 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
     protected void onResume() {
         super.onResume();
 
-        startService(new Intent(this, MobileMsgService.class));
-        if (Global.GACConnected){
+
+        /*if (Global.GACConnected){
             MobileMsgService.sendMessage("/connected", "wear msg");
-        }
+        }*/
     }
 
     @Override
@@ -56,7 +56,11 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
 
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            MobileMsgService.sendMessage("/connected", "mobile msg");
+            //MobileMsgService.sendMessage("/connected", "mobile msg");
+            int step = intent.getIntExtra("step", 0);
+            if(step == 1){
+                startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
+            }
         }
     }
 

@@ -63,7 +63,7 @@
             android:layout_centerHorizontal="true"
 
             android:switchMinWidth="60dp"
-            android:checked="true"
+            android:checked="false"
             android:textOff="off"
             android:textOn="on"
             android:textColor="#767677"

@@ -24,63 +24,19 @@ public class PollingService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_WORLD_READABLE);
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
         String user_id = sharedPreferences.getString("user_id", "-1");
+        polling(user_id);
 
-        String Pollingurl = "http://intersectionserver-1232.appspot.com/is_matched/"+user_id;
-        StringRequest matchreq = new StringRequest(Request.Method.GET, Pollingurl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        System.out.println(response);
-                        try {
-                            JSONObject result = new JSONObject(response);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        //// TODO: 3/2/16  send message to watch, if...else...
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-            }
-        });
-
-        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(matchreq);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_WORLD_READABLE);
+        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
         String user_id = sharedPreferences.getString("user_id", "-1");
-
-        String Pollingurl = "http://intersectionserver-1232.appspot.com/is_matched/"+user_id;
-        StringRequest matchreq = new StringRequest(Request.Method.GET, Pollingurl,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        System.out.println(response);
-                        try {
-                            JSONObject result = new JSONObject(response);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-
-                        //// TODO: 3/2/16  send message to watch, if...else...
-
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
-            }
-        });
-
-        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(matchreq);
+        polling(user_id);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -88,5 +44,38 @@ public class PollingService extends Service {
     @Override
     public IBinder onBind(Intent intent) {
         return null;
+    }
+
+    public void polling(String id){
+        String Pollingurl = "http://intersectionserver-1232.appspot.com/is_matched/"+id;
+        StringRequest matchreq = new StringRequest(Request.Method.GET, Pollingurl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        System.out.println("server response"+response);
+                        String is_matched = "false";
+                        String name = "-1";
+                        try {
+                            JSONObject result = new JSONObject(response);
+                            is_matched = result.get("is_matched").toString();
+                            name = result.get("name").toString();
+                            System.out.println(is_matched+name);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+
+                        //send msg to watch if is matched
+                        if(is_matched == "true") {
+                            WearMsgService.sendMessage("/vibrate", name);
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println(error);
+            }
+        });
+
+        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(matchreq);
     }
 }
