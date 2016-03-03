@@ -1,8 +1,11 @@
 package com.dartmouth.cs.intersection;
 
+
+import android.content.SharedPreferences;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -45,6 +48,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     private AccessToken mAccessToken;
     private String user_id = "";
     private final String WEAR_MESSAGE_PATH = "/connected";
+    private GACConnectedReceiver gacConnReceiver;
 
 
     private Scheduler GPSscheduler;
@@ -62,7 +66,11 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
         //initGoogleApiClient();
         startService(new Intent(this, WearMsgService.class));
-        WearMsgService.sendMessage("/connected", "mobile msg");
+        if(Global.GACConnected){
+            WearMsgService.sendMessage("/connected", "mobile msg");
+        }
+
+        gacConnReceiver = new GACConnectedReceiver();
 
         FacebookSdk.sdkInitialize(getApplicationContext());
         mCallbackManager = CallbackManager.Factory.create();
@@ -326,12 +334,14 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 //        if(recordedAccessToken!="-1"){
 //            showMoreInfo();
 //        }
-
+        IntentFilter intentFilter = new IntentFilter(Global.GAC_BROADCAST_FILTER);
+        registerReceiver(gacConnReceiver, intentFilter);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unregisterReceiver(gacConnReceiver);
         /*mApiClient.disconnect();*/
     }
 
@@ -340,6 +350,14 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     {
         super.onActivityResult(requestCode, resultCode, data);
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public class GACConnectedReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            WearMsgService.sendMessage("/connected", "mobile msg");
+        }
     }
 
     /*private void initGoogleApiClient() {

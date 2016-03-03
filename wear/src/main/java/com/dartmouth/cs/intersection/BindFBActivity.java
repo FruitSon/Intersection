@@ -30,6 +30,9 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
         mContext = this;
 
         //initGoogleApiClient();
+
+        /*startService(new Intent(this, MobileMsgService.class));
+        MobileMsgService.sendMessage("/connected", "wear msg");*/
     }
 
     @Override

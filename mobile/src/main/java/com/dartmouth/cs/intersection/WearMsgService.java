@@ -2,6 +2,7 @@ package com.dartmouth.cs.intersection;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
@@ -51,7 +52,7 @@ public class WearMsgService extends WearableListenerService implements
 
     @Override
     public void onCreate() {
-        //super.onCreate();
+        super.onCreate();
         if(null == mGoogleApiClient) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(Wearable.API)
@@ -66,9 +67,8 @@ public class WearMsgService extends WearableListenerService implements
             Log.v(TAG, "Connecting to GoogleApiClient..");
         }
         Log.v(TAG, "Created");
-
-
     }
+
 
     @Override
     public void onDestroy() {
@@ -128,7 +128,10 @@ public class WearMsgService extends WearableListenerService implements
 
     @Override
     public void onConnected(Bundle bundle) {
+        Global.GACConnected = true;
 
+        Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
+        sendBroadcast(intent);
     }
 
     @Override
