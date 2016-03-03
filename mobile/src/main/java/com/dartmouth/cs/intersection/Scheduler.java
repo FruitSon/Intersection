@@ -20,8 +20,9 @@ public class Scheduler {
         // the request code distinguish different stress meter schedule instances
 
 //        Intent intent = new Intent(context, AlarmReceiver.class);
+        System.out.println("gpsgpsgps");
         Intent intent = new Intent(context, GPSService.class);
-        PendingIntent pi = PendingIntent.getBroadcast(context, 10, intent,
+        PendingIntent pi = PendingIntent.getService(context, 10, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
         Calendar calendar = Calendar.getInstance();
@@ -30,13 +31,13 @@ public class Scheduler {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         //RTC_WAKEUP, wake up the device when it goes off.
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 60*1000, pi);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 30*1000, pi);
     }
 
     public static void setSchedule(Context context, int duration) {
 
         Intent intent = new Intent(context, PollingService.class);
-        PendingIntent pi = PendingIntent.getBroadcast(context, 10, intent,
+        PendingIntent pi = PendingIntent.getService(context, 10, intent,
                 PendingIntent.FLAG_CANCEL_CURRENT);
 
         Calendar calendar = Calendar.getInstance();

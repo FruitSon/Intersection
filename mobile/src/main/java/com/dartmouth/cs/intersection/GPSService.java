@@ -1,7 +1,6 @@
 package com.dartmouth.cs.intersection;
 
 import android.app.Service;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
@@ -13,15 +12,12 @@ import android.support.annotation.Nullable;
 import android.util.Log;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
 
 public class GPSService extends Service implements LocationListener{
 
-    private final Context mContext;
     private Location finalLocation = null;
     private Location curLocation = null;
     private Location location_g = null;
@@ -37,31 +33,25 @@ public class GPSService extends Service implements LocationListener{
     private boolean isNetworkEnabled = false;
 
 
-    public GPSService(Context context) {
-        this.mContext = context;
+    public GPSService() {
     }
 
 
     @Override
     public void onCreate() {
         super.onCreate();
-    }
-
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
         curLocation = getLocation();
 
-        //send to server
-        RequestQueue rq = Volley.newRequestQueue(getApplicationContext());
+        System.out.println("location:"+curLocation.toString());
 
+        //send to server
         longitude = curLocation.getLongitude();
         latitude = curLocation.getLatitude();
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
         String user_id = sharedPreferences.getString("user_id", "-1");
 
-        String GPSurl = "http://intersectionserver-1232.appspot.com/upload_gps/"+user_id+","+longitude+","+latitude;
+        String GPSurl = "http://intersectionserver-1232.appspot.com/upload_gps/"+user_id+"/"+longitude+","+latitude;
         StringRequest gpsreq = new StringRequest(Request.Method.GET, GPSurl,
                 new Response.Listener<String>() {
                     @Override
@@ -75,7 +65,39 @@ public class GPSService extends Service implements LocationListener{
             }
         });
 
-        rq.add(gpsreq);
+        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(gpsreq);
+
+    }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        curLocation = getLocation();
+        System.out.println("location:"+curLocation.toString());
+
+        //send to server
+        longitude = curLocation.getLongitude();
+        latitude = curLocation.getLatitude();
+
+        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
+        String user_id = sharedPreferences.getString("user_id", "-1");
+
+        String GPSurl = "http://intersectionserver-1232.appspot.com/upload_gps/"+user_id+"/"+latitude+","+longitude;
+        System.out.println(GPSurl);
+        StringRequest gpsreq = new StringRequest(Request.Method.GET, GPSurl,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        System.out.println(response);
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                System.out.println(error);
+            }
+        });
+
+        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(gpsreq);
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -89,7 +111,7 @@ public class GPSService extends Service implements LocationListener{
 
     public Location getLocation(){
         try {
-            lm = (LocationManager) mContext.getSystemService(LOCATION_SERVICE);
+            lm = (LocationManager) getApplicationContext().getSystemService(LOCATION_SERVICE);
             isGPSEnabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
             isNetworkEnabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
 

@@ -10,14 +10,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -47,7 +44,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
 
     private boolean userSkippedLogin = false;
-    private AccessTokenTracker mAccessTokenTracker;
 
     private MainFragment mainPage;
 
@@ -102,7 +98,8 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
 
                 //get accessToken
                 mAccessToken = AccessToken.getCurrentAccessToken();
-                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+
+//                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
 
 //                //Save access Token and required information in .xml file
 //                SharedPreferences mPreferences = getSharedPreferences("UserInfo", Context.MODE_WORLD_READABLE);
@@ -156,7 +153,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                     }
                 });
 
-                queue.add(appreq);
+                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(appreq);
 //
 //
 //                // Instantiate the RequestQueue.
@@ -267,6 +264,16 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                                 mEditor.commit();
 
                                                                 System.out.println(user_id);
+
+                                                                //Send Message to wearable devices
+                                                                initGoogleApiClient();
+
+                                                                //start update GPS service to server
+                                                                GPSscheduler.setSchedule(getApplicationContext());
+
+                                                                //start querying server, every 10 s
+                                                                POLLINGscheduler.setSchedule(getApplicationContext(),60000);
+
                                                             }
                                                         }, new Response.ErrorListener() {
                                                     @Override
@@ -274,17 +281,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                         System.out.println(error);
                                                     }
                                                 });
-                                                queue.add(req);
-
-
-                                                //Send Message to wearable devices
-                                                initGoogleApiClient();
-
-                                                //start update GPS service to server
-                                                GPSscheduler.setSchedule(getApplicationContext());
-
-                                                //start querying server, every 10 s
-                                                POLLINGscheduler.setSchedule(getApplicationContext(),10000);
+                                                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
 
 
                                             }
