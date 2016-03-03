@@ -1,51 +1,85 @@
 package com.dartmouth.cs.intersection;
 
-import android.app.PendingIntent;
+import android.app.NotificationManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.location.Location;
 import android.os.Bundle;
+import android.util.Log;
 
-public class AlarmReceiver extends BroadcastReceiver {
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+
+
+public class AlarmReceiver extends BroadcastReceiver implements
+        GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, LocationListener {
+
+//    private boolean gps_enabled = false;
+//    private boolean network_enabled = false;
+//    private Location gps_location = null, network_location = null, final_location = null;
+
+    // A request to connect to Location Services
+    private LocationRequest mLocationRequest;
+    // Stores the current instantiation of the location client in this object
+    private GoogleApiClient mGoogleApiClient;
+    private NotificationManager mNotificationManager;
+    // service started flag
+    private boolean mIsStarted;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        startUpdate(context);
+
+        mIsStarted = false;
+        mGoogleApiClient = new GoogleApiClient.Builder(context)
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .build();
+
+        uploadGPS(context);
+
     }
 
-    private void startUpdate(Context context) {
-        int notificationId = 001;
+    private void uploadGPS(Context context) {
+        getLocation();
 
-        // Build intent for notification content
-        Intent viewIntent = new Intent(context, GPSService.class);
+        //upload GPS
+    }
 
-        Bundle b = new Bundle();
-        b.putInt("page", 1); //Your id
-        viewIntent.putExtras(b); //Put your id to your next Intent
+    private Location getLocation(){
 
-        PendingIntent viewPendingIntent =
-                PendingIntent.getActivity(context, 0, viewIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-//
-//        NotificationCompat.Builder notificationBuilder =
-//                new NotificationCompat.Builder(context)
-//                        .setSmallIcon(R.drawable.ic_launcher)
-//                        .setContentTitle("Stress")
-//                        .setDefaults(Notification.DEFAULT_ALL)
-//                        .setAutoCancel(true)
-//                        .setContentText("Start to take measurement")
-//                        .setContentIntent(viewPendingIntent);
-//
-//// Get an instance of the NotificationManager service
-//        NotificationManagerCompat notificationManager =
-//                NotificationManagerCompat.from(context);
-//
-//// Build the notification and issues it with notification manager.
-//        notificationManager.notify(notificationId, notificationBuilder.build());
-//
-//        //EMAAlert.getAlertObject().startAlert(context);
-//
-//        //notificationManager.cancel(notificationId);
+        return null;
+    }
+
+    @Override
+    public void onConnected(Bundle bundle) {
+        Log.e("onConnected", "onConnected");
+        mLocationRequest = LocationRequest.create();
+        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+        mLocationRequest.setInterval(1000); // Update location every second
+
+        LocationServices.FusedLocationApi.requestLocationUpdates(
+                mGoogleApiClient, mLocationRequest, this);
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onLocationChanged(Location location) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(ConnectionResult connectionResult) {
 
     }
 }

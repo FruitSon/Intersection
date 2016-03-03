@@ -1,5 +1,7 @@
 package com.dartmouth.cs.intersection;
 
+
+import android.content.SharedPreferences;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -11,13 +13,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
 import com.android.volley.Request;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.Volley;
 import com.facebook.AccessToken;
-import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -33,7 +33,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -41,7 +40,6 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity /*implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener*/{
 
     private boolean userSkippedLogin = false;
-    private AccessTokenTracker mAccessTokenTracker;
 
     private MainFragment mainPage;
 
@@ -51,6 +49,11 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     private String user_id = "";
     private final String WEAR_MESSAGE_PATH = "/connected";
     private GACConnectedReceiver gacConnReceiver;
+
+
+    private Scheduler GPSscheduler;
+    private Scheduler POLLINGscheduler;
+
 
     //Mobile - wear connection
     private GoogleApiClient mApiClient;
@@ -76,9 +79,10 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
 
         mLoginButton = (LoginButton) findViewById(R.id.login_button);
-        List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books","user_actions.music",
-                "user_education_history", "user_games_activity", "user_hometown", "user_location", "user_tagged_places",
-                "user_work_history","user_photos", "public_profile");
+        List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books",
+                "user_actions.music", "user_education_history", "user_games_activity",
+                "user_hometown", "user_location", "user_tagged_places", "user_work_history",
+                "user_photos", "public_profile");
         mLoginButton.setReadPermissions(permissionNeeds);
 
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -101,7 +105,8 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
                 //get accessToken
                 mAccessToken = AccessToken.getCurrentAccessToken();
-                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+
+//                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
 
 //                //Save access Token and required information in .xml file
 
@@ -113,16 +118,68 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                 List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
 
                 final ArrayList<String> appList = new ArrayList<String>();
-                ArrayList<String> packagelist = new ArrayList<String>();
+                JSONArray packagelist = new JSONArray();
 
                 for (ApplicationInfo p : packages) {
                     if ((p.flags & ApplicationInfo.FLAG_SYSTEM) != 1) {
                         //packageName
-                        packagelist.add(p.packageName);
+                        packagelist.put(p.packageName);
                         //ApplicationName
                         appList.add(pm.getApplicationLabel(p).toString());
                     }
                 }
+
+
+                JSONObject packs = new JSONObject();
+                try {
+                    packs.put("packages",packagelist);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                System.out.println(packs);
+
+//                //send it to http://api.wheredatapp.com/data
+                String key = "438e3a19ff29c8df9fa44e3381d29e347460ca66bba8c46846739925";
+                String appurl = "http://api.wheredatapp.com/data?key="+key;
+                JsonObjectRequest appreq = new JsonObjectRequest(Request.Method.POST, appurl, packs,
+                        new Response.Listener<JSONObject>() {
+                            @Override
+                            public void onResponse(JSONObject response) {
+                                System.out.println(response);
+                            }
+                        }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError error) {
+                        VolleyLog.e(error.toString());
+                    }
+                });
+
+                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(appreq);
+//
+//
+//                // Instantiate the RequestQueue.
+//                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
+//                String url = "http://intersectionserver-1232.appspot.com/register";
+//
+//                // Request a string response from the provided URL.
+//                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+//                        new Response.Listener<String>() {
+//                            @Override
+//                            public void onResponse(String response) {
+//                                // Display the first 500 characters of the response string.
+//                                System.out.println(response);
+//                            }
+//                        }, new Response.ErrorListener() {
+//                    @Override
+//                    public void onErrorResponse(VolleyError error) {
+//
+//                    }
+//                });
+//
+//                // Add the request to the RequestQueue.
+//                queue.add(stringRequest);
+
 
                 try {
                     userINFO.put("FacebookID", mAccessToken.getUserId());
@@ -146,6 +203,8 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                         String imgUrl = "https://graph.facebook.com/"
                                                 + mAccessToken.getUserId() + "/picture?type=large";
                                         userINFO.put("photo URL", imgUrl);
+                                        System.out.println("url"+response.toString());
+
                                     } catch (Exception e) {
                                         e.printStackTrace();
                                     }
@@ -171,6 +230,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                 }
 
                                                 System.out.println(object);
+                                                System.out.println("Feedback from fb"+response.toString());
 
 
                                                 try {
@@ -179,10 +239,13 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                     e.printStackTrace();
                                                 }
 
-                                                System.out.println(userINFO.toString());
+                                                System.out.println("FBinfo"+object.toString());
+                                                System.out.println("userINFO"+userINFO.toString());
 
-                                                String appurl = "http://intersectionserver-1232.appspot.com/register";
-                                                JsonObjectRequest req = new JsonObjectRequest(Request.Method.POST, appurl, userINFO,
+                                                String serverurl =
+                                                        "http://intersectionserver-1232.appspot.com/register";
+                                                JsonObjectRequest req = new JsonObjectRequest(
+                                                        Request.Method.POST, serverurl, userINFO,
                                                         new Response.Listener<JSONObject>() {
                                                             @Override
                                                             public void onResponse(JSONObject response) {
@@ -192,6 +255,28 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                                 } catch (JSONException e) {
                                                                     e.printStackTrace();
                                                                 }
+
+                                                                //Save user_id in .xml file
+                                                                SharedPreferences mPreferences
+                                                                        = getSharedPreferences
+                                                                        ("UserInfo", Context.MODE_WORLD_READABLE);
+                                                                SharedPreferences.Editor mEditor
+                                                                        = mPreferences.edit();
+
+                                                                mEditor.putString("user_id", user_id);
+                                                                mEditor.commit();
+
+                                                                System.out.println(user_id);
+
+                                                                //Send Message to wearable devices
+//                                                                initGoogleApiClient();
+
+                                                                //start update GPS service to server
+                                                                GPSscheduler.setSchedule(getApplicationContext());
+
+                                                                //start querying server, every 10 s
+                                                                POLLINGscheduler.setSchedule(getApplicationContext(),60000);
+
                                                             }
                                                         }, new Response.ErrorListener() {
                                                     @Override
@@ -199,19 +284,14 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                         System.out.println(error);
                                                     }
                                                 });
-                                                queue.add(req);
+                                                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
 
-
-                                                //Send Message to wearable devices
-                                                //initGoogleApiClient();
-
-                                                //start GPS service
-                                                //start update GPS service
 
                                             }
                                         });
                                 Bundle parameters = new Bundle();
-                                parameters.putString("fields", "name,gender,location,hometown,education,work,tagged_places,music,books");
+                                parameters.putString("fields", "name,gender,location,hometown," +
+                                        "education,work,tagged_places,music,books");
                                 requestMe.setParameters(parameters);
                                 requestMe.executeAsync();
                             }
@@ -292,7 +372,6 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
     @Override
     public void onConnected(Bundle bundle) {
-
         Wearable.MessageApi.addListener( mApiClient, this );
         sendMessage("/loginsuess", user_id);
     }
