@@ -30,6 +30,10 @@ public class LauncherActivity extends WearableActivity {
         mContainerView = (BoxInsetLayout) findViewById(R.id.container);
 
         SharedPreferences preferences = getSharedPreferences("settings", 0);
+        SharedPreferences.Editor editor = preferences.edit();
+
+        /*editor.putInt("SettingSteps", 0);
+        editor.commit();*/
 
         switch (preferences.getInt("SettingSteps", 0)){
             case 0:
@@ -52,10 +56,10 @@ public class LauncherActivity extends WearableActivity {
                 mGridPager = (GridViewPager) findViewById(R.id.pager);
                 SimpleFragGridAdapter mAdapter = new SimpleFragGridAdapter(getFragmentManager());
                 mGridPager.setAdapter(mAdapter);
-                SharedPreferences.Editor editor = preferences.edit();
+                /*SharedPreferences.Editor editor = preferences.edit();
 
                 editor.putInt("SettingSteps", 0);
-                editor.commit();
+                editor.commit();*/
 
                 break;
             default:

@@ -1,13 +1,11 @@
-package com.dartmouth.cs.intersection.service;
+package com.dartmouth.cs.intersection;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 
-import com.dartmouth.cs.intersection.FeaturesActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
@@ -20,9 +18,9 @@ import com.google.android.gms.wearable.WearableListenerService;
 import java.io.UnsupportedEncodingException;
 
 /**
- * Created by _ReacTor on 16/2/28.
+ * Created by _ReacTor on 16/3/2.
  */
-public class MobileMsgService extends WearableListenerService implements
+public class WearMsgService extends WearableListenerService implements
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener{
     private static final String TAG = "WEAR_LISTENER";
@@ -33,10 +31,7 @@ public class MobileMsgService extends WearableListenerService implements
     private static GoogleApiClient mGoogleApiClient;
 
     @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.v(TAG, "Created");
-
+    public int onStartCommand(Intent intent, int flags, int startId) {
         if(null == mGoogleApiClient) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addApi(Wearable.API)
@@ -50,6 +45,29 @@ public class MobileMsgService extends WearableListenerService implements
             mGoogleApiClient.connect();
             Log.v(TAG, "Connecting to GoogleApiClient..");
         }
+        return super.onStartCommand(intent, flags, startId);
+
+    }
+
+    @Override
+    public void onCreate() {
+        //super.onCreate();
+        if(null == mGoogleApiClient) {
+            mGoogleApiClient = new GoogleApiClient.Builder(this)
+                    .addApi(Wearable.API)
+                    .addConnectionCallbacks(this)
+                    .addOnConnectionFailedListener(this)
+                    .build();
+            Log.v(TAG, "GoogleApiClient created");
+        }
+
+        if(!mGoogleApiClient.isConnected()){
+            mGoogleApiClient.connect();
+            Log.v(TAG, "Connecting to GoogleApiClient..");
+        }
+        Log.v(TAG, "Created");
+
+
     }
 
     @Override
@@ -87,30 +105,22 @@ public class MobileMsgService extends WearableListenerService implements
         new Thread(new Runnable() {
             @Override
             public void run() {
+                Log.d("Wear received", "received");
                 if (messageEvent.getPath().equalsIgnoreCase(TEST_CONNECT_PATH)) {
+
                     byte[] bb = messageEvent.getData();
                     try {
                         Log.d("Wear received", new String(bb, "UTF-8"));
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-                }else{
-                    SharedPreferences preferences = getSharedPreferences("settings", 0);
-                    SharedPreferences.Editor editor = preferences.edit();
-
-                    editor.putInt("SettingSteps", 1);
-                    editor.commit();
-
-                    startActivity(new Intent(getApplicationContext(), FeaturesActivity.class));
-
-                    byte[] bb = messageEvent.getData();
-                    String user_id = null;
+                    /*String user_id = null;
                     try {
                         user_id = new String(bb, "UTF-8");
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-                    MobileMsgService.sendMessage("/received", user_id);
+                    WearMsgService.sendMessage("/received", user_id);*/
                 }
             }
         });
