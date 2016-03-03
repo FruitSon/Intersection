@@ -24,24 +24,17 @@ import com.facebook.GraphResponse;
 import com.facebook.HttpMethod;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
-import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.MessageApi;
-import com.google.android.gms.wearable.MessageEvent;
-import com.google.android.gms.wearable.Node;
-import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.Wearable;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener{
+public class MainActivity extends AppCompatActivity /*implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener*/{
 
     private boolean userSkippedLogin = false;
 
@@ -65,6 +58,12 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        //initGoogleApiClient();
+        startService(new Intent(this, WearMsgService.class));
+        WearMsgService.sendMessage("/connected", "mobile msg");
+
         FacebookSdk.sdkInitialize(getApplicationContext());
         mCallbackManager = CallbackManager.Factory.create();
 
@@ -102,12 +101,6 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
 //                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
 
 //                //Save access Token and required information in .xml file
-//                SharedPreferences mPreferences = getSharedPreferences("UserInfo", Context.MODE_WORLD_READABLE);
-//                SharedPreferences.Editor mEditor = mPreferences.edit();
-//
-//                mEditor.putString("AccessToken", mAccessToken.getToken());
-//                mEditor.putString("LastRefresh", mAccessToken.getLastRefresh().toString());
-//                mEditor.commit();
 
 
                 //get a list of installed apps
@@ -127,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                         appList.add(pm.getApplicationLabel(p).toString());
                     }
                 }
+
 
                 JSONObject packs = new JSONObject();
                 try {
@@ -177,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
 //
 //                // Add the request to the RequestQueue.
 //                queue.add(stringRequest);
+
 
                 try {
                     userINFO.put("FacebookID", mAccessToken.getUserId());
@@ -266,7 +261,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                                                                 System.out.println(user_id);
 
                                                                 //Send Message to wearable devices
-                                                                initGoogleApiClient();
+//                                                                initGoogleApiClient();
 
                                                                 //start update GPS service to server
                                                                 GPSscheduler.setSchedule(getApplicationContext());
@@ -294,7 +289,6 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                             }
                         }
                 ).executeAsync();
-
             }
 
             @Override
@@ -338,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        mApiClient.disconnect();
+        /*mApiClient.disconnect();*/
     }
 
     @Override
@@ -348,7 +342,7 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
         mCallbackManager.onActivityResult(requestCode, resultCode, data);
     }
 
-    private void initGoogleApiClient() {
+    /*private void initGoogleApiClient() {
         mApiClient = new GoogleApiClient.Builder( this )
                 .addApi( Wearable.API )
                 .addConnectionCallbacks(this)
@@ -360,10 +354,8 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
 
     @Override
     public void onConnected(Bundle bundle) {
-
-        Wearable.MessageApi.addListener(mApiClient, this);
-        sendMessage("/loginsuccess", user_id);
-        System.out.println("connected" + user_id);
+        Wearable.MessageApi.addListener( mApiClient, this );
+        sendMessage("/loginsuess", user_id);
     }
 
     @Override
@@ -411,6 +403,6 @@ public class MainActivity extends AppCompatActivity implements MessageApi.Messag
                 }
             }
         });
-    }
+    }*/
 }
 
