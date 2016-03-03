@@ -15,6 +15,7 @@ import android.widget.Toast;
 import com.dartmouth.cs.intersection.data.FeatureListAdapter;
 import com.dartmouth.cs.intersection.service.MobileMsgService;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -24,6 +25,9 @@ import java.util.Set;
  * Created by _ReacTor on 16/2/22.
  */
 public class FeaturesActivity extends WearableActivity {
+
+    private SharedPreferences preferences;
+
     public static int selectedFeatures = 0;
     public static Set featureSet = new HashSet();
 
@@ -36,11 +40,21 @@ public class FeaturesActivity extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_features);
 
+        preferences = getSharedPreferences("settings", 0);
+        String[] savedFeatureArr = preferences.getString("Features", "-1").split(",");
+
         startService(new Intent(this, MobileMsgService.class));
-        MobileMsgService.sendMessage("/connected", "wear msg");
+        if (Global.GACConnected){
+            MobileMsgService.sendMessage("/connected", "wear msg");
+        }
 
         mListView = (ListView) findViewById(R.id.listview_features);
         listAdapter = new FeatureListAdapter(this, 0);
+        for (String num: savedFeatureArr) {
+            if(Integer.parseInt(num)!=-1) {
+                listAdapter.isSetted[Integer.parseInt(num)] = true;
+            }
+        }
 
         mListView.setAdapter(listAdapter);
 
@@ -51,23 +65,30 @@ public class FeaturesActivity extends WearableActivity {
             public void onClick(View v) {
                 View view;
                 CheckBox chBox;
-
+                featureSet.clear();
 
                 for (int i = 0; i < mListView.getCount(); i++) {
                     view = mListView.getAdapter().getView(i, null, null);
                     chBox = (CheckBox) view.findViewById(R.id.checkbox);//your xml id value for checkBox.
                     if (chBox.isChecked()) {
-                        featureSet.add(i);
+                        featureSet.add(i+"");
                     }
                 }
 
-                Log.d("Saved Features",featureSet.toString());
 
-                /*SharedPreferences preferences = getSharedPreferences("settings", 0);
+                SharedPreferences.Editor editor = preferences.edit();
+                Iterator<String> i = featureSet.iterator();
+                String features = "";
+                while(i.hasNext()){
+                    features+=i.next()+",";
+                }
+                if(features.charAt(features.length()-1) == ','){
+                    features = features.substring(0,features.length()-1);
+                }
+                Log.d("Feature Arr", features);
+                editor.putString("Features", features);
 
                 int settingStep = preferences.getInt("SettingSteps", 0);
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putStr("Features", featureStr);
 
                 if(settingStep < 2) {
                     editor.putInt("SettingSteps", 2);
@@ -78,7 +99,8 @@ public class FeaturesActivity extends WearableActivity {
 
                 if(settingStep == 4){
                     finish();
-                }*/
+                    editor.commit();
+                }
             }
         });
     }

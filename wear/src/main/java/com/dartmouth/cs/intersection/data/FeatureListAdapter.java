@@ -20,12 +20,11 @@ import com.dartmouth.cs.intersection.R;
 public class FeatureListAdapter extends ArrayAdapter<String>{
     private Context context;
     private String[] values = {"Facebook", "Lifestyle", "Location", "Sports", "App", "Hobbies", "Social"};
-    private final boolean[] isSetted;
+    public static final boolean[] isSetted = {false, false, false, false, false, false, false};
 
     public FeatureListAdapter(Context context, int resource) {
         super(context, resource);
         this.context = context;
-        isSetted = new boolean[values.length];
     }
 
 
@@ -43,11 +42,13 @@ public class FeatureListAdapter extends ArrayAdapter<String>{
                 CheckBox checkBox = (CheckBox) v;
                 if (!checkBox.isChecked()) {
                     FeaturesActivity.selectedFeatures--;
+                    isSetted[position] = false;
                     return;
                 }
 
                 if (FeaturesActivity.selectedFeatures < 3) {
                     FeaturesActivity.selectedFeatures++;
+                    isSetted[position] = true;
                 } else {
                     Toast.makeText(getContext(), "Limit Reached", Toast.LENGTH_LONG).show();
 
@@ -56,12 +57,6 @@ public class FeatureListAdapter extends ArrayAdapter<String>{
             }
         });
 
-        /*mCheckBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-
-            }
-        });*/
         mCheckBox.setChecked(isSetted[position]);
         return v;
     }

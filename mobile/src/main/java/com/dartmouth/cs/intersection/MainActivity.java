@@ -66,9 +66,9 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
         //initGoogleApiClient();
         startService(new Intent(this, WearMsgService.class));
-        if(Global.GACConnected){
+        /*if(Global.GACConnected){
             WearMsgService.sendMessage("/connected", "mobile msg");
-        }
+        }*/
 
         gacConnReceiver = new GACConnectedReceiver();
 
@@ -265,6 +265,13 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                                 mEditor.commit();
 
 
+                                                                System.out.println(user_id);
+
+                                                                //Send Message to wearable devices
+//                                                                initGoogleApiClient();
+                                                                if(Global.GACConnected) {
+                                                                    WearMsgService.sendMessage("/fbconnected", "mobile msg");
+                                                                }
                                                                 //start update GPS service to server
                                                                 GPSscheduler.setSchedule(getApplicationContext());
 
@@ -350,7 +357,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            WearMsgService.sendMessage("/connected", "mobile msg");
+            //WearMsgService.sendMessage("/connected", "mobile msg");
         }
     }
 

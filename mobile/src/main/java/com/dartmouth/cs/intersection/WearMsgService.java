@@ -105,32 +105,21 @@ public class WearMsgService extends WearableListenerService implements
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
 
-        //set vibrate mode
-        byte[] message = messageEvent.getData();
-
-
-
 
         Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(1000);
+
+
         new Thread(new Runnable() {
             @Override
             public void run() {
                 Log.d("Wear received", "received");
-                if (messageEvent.getPath().equalsIgnoreCase(TEST_CONNECT_PATH)) {
+                SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
+                String user_id = sharedPreferences.getString("user_id", "-1");
 
-                    byte[] bb = messageEvent.getData();
-                    try {
-                        Log.d("Wear received", new String(bb, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-
+                if(messageEvent.getPath().equals("/pairopen")){
                     //set vibrate
-                    SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
-                    String user_id = sharedPreferences.getString("user_id", "-1");
 
-                    if(messageEvent.getPath()=="/vibrate") {
                         String vibrateurl =
                                 "http://intersectionserver-1232.appspot.com/admin/set_vibrate/" + user_id + "/1";
 
@@ -148,6 +137,17 @@ public class WearMsgService extends WearableListenerService implements
                             }
                         });
                         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
+
+                }
+
+
+                if (messageEvent.getPath().equalsIgnoreCase(TEST_CONNECT_PATH)) {
+
+                    byte[] bb = messageEvent.getData();
+                    try {
+                        Log.d("Wear received", new String(bb, "UTF-8"));
+                    } catch (UnsupportedEncodingException e) {
+                        e.printStackTrace();
                     }
 
 
@@ -160,7 +160,7 @@ public class WearMsgService extends WearableListenerService implements
                     WearMsgService.sendMessage("/received", user_id);*/
                 }
             }
-        });
+        }).start();
     }
 
     @Override

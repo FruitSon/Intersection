@@ -55,17 +55,20 @@ public class PollingService extends Service {
                         System.out.println("server response"+response);
                         String is_matched = "false";
 
+                        String name = "-1";
                         try {
                             JSONObject result = new JSONObject(response);
                             is_matched = result.get("is_matched").toString();
-
+                            name = result.get("name").toString();
+                            System.out.println(is_matched+name);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
 
                         //send msg to watch if is matched
                         if(is_matched == "true") {
-                            WearMsgService.sendMessage("/connected", response);
+
+                            WearMsgService.sendMessage("/vibrate", name);
                         }
                     }
                 }, new Response.ErrorListener() {
