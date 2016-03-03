@@ -2,11 +2,15 @@ package com.dartmouth.cs.intersection;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
 import android.util.Log;
 
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.StringRequest;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.MessageApi;
@@ -100,6 +104,13 @@ public class WearMsgService extends WearableListenerService implements
 
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
+
+        //set vibrate mode
+        byte[] message = messageEvent.getData();
+
+
+
+
         Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(1000);
         new Thread(new Runnable() {
@@ -114,6 +125,32 @@ public class WearMsgService extends WearableListenerService implements
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
+
+                    //set vibrate
+                    SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
+                    String user_id = sharedPreferences.getString("user_id", "-1");
+
+                    if(messageEvent.getPath()=="/vibrate") {
+                        String vibrateurl =
+                                "http://intersectionserver-1232.appspot.com/admin/set_vibrate/" + user_id + "/1";
+
+                        StringRequest req = new StringRequest(
+                                Request.Method.GET, vibrateurl,
+                                new Response.Listener<String>() {
+                                    @Override
+                                    public void onResponse(String response) {
+
+                                    }
+                                }, new Response.ErrorListener() {
+                            @Override
+                            public void onErrorResponse(VolleyError error) {
+                                System.out.println(error);
+                            }
+                        });
+                        VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
+                    }
+
+
                     /*String user_id = null;
                     try {
                         user_id = new String(bb, "UTF-8");
