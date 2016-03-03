@@ -1,5 +1,6 @@
 package com.dartmouth.cs.intersection;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -40,13 +41,23 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
         super.onResume();
 
         startService(new Intent(this, MobileMsgService.class));
-        MobileMsgService.sendMessage("/connected", "wear msg");
+        if (Global.GACConnected){
+            MobileMsgService.sendMessage("/connected", "wear msg");
+        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
         //mApiClient.disconnect();
+    }
+
+    public class GACConnectedReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            MobileMsgService.sendMessage("/connected", "mobile msg");
+        }
     }
 
     /*private void initGoogleApiClient() {

@@ -1,5 +1,7 @@
 package com.dartmouth.cs.intersection;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -8,6 +10,7 @@ import android.support.wearable.view.BoxInsetLayout;
 import android.support.wearable.view.GridViewPager;
 
 import com.dartmouth.cs.intersection.data.SimpleFragGridAdapter;
+import com.dartmouth.cs.intersection.service.MobileMsgService;
 
 import java.text.SimpleDateFormat;
 import java.util.Locale;
@@ -91,6 +94,14 @@ public class LauncherActivity extends WearableActivity {
             mContainerView.setBackgroundColor(getResources().getColor(android.R.color.black));
         } else {
             mContainerView.setBackground(null);
+        }
+    }
+
+    public class GACConnectedReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            MobileMsgService.sendMessage("/connected", "mobile msg");
         }
     }
 }
