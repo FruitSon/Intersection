@@ -3,6 +3,7 @@ package com.dartmouth.cs.intersection;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.util.Log;
@@ -24,12 +25,16 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
     private GoogleApiClient mApiClient;
     private Context mContext;
 
+    private GACConnectedReceiver gacConnReceiver;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_bindfb);
         mContext = this;
 
+
+        gacConnReceiver = new GACConnectedReceiver();
         //initGoogleApiClient();
 
         /*startService(new Intent(this, MobileMsgService.class));
@@ -39,6 +44,8 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
     @Override
     protected void onResume() {
         super.onResume();
+        IntentFilter intentFilter = new IntentFilter(Global.GAC_BROADCAST_FILTER);
+        registerReceiver(gacConnReceiver, intentFilter);
 
 
         /*if (Global.GACConnected){
@@ -50,6 +57,7 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
     protected void onDestroy() {
         super.onDestroy();
         //mApiClient.disconnect();
+        unregisterReceiver(gacConnReceiver);
     }
 
     public class GACConnectedReceiver extends BroadcastReceiver {
@@ -60,6 +68,7 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
             int step = intent.getIntExtra("step", 0);
             if(step == 1){
                 startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
+                finish();
             }
         }
     }

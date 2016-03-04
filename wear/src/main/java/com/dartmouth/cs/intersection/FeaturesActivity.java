@@ -45,7 +45,7 @@ public class FeaturesActivity extends WearableActivity {
 
         startService(new Intent(this, MobileMsgService.class));
         if (Global.GACConnected){
-            MobileMsgService.sendMessage("/connected", "wear msg");
+            //MobileMsgService.sendMessage("/connected", "wear msg");
         }
 
         mListView = (ListView) findViewById(R.id.listview_features);
