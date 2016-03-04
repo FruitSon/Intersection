@@ -3,6 +3,8 @@ package com.dartmouth.cs.intersection;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 
@@ -10,9 +12,13 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
+import com.google.android.gms.wearable.Asset;
 
-import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.net.URL;
 
 
 public class PollingService extends Service {
@@ -54,21 +60,44 @@ public class PollingService extends Service {
                     public void onResponse(String response) {
                         System.out.println("server response"+response);
                         String is_matched = "false";
-
                         String name = "-1";
+                        URL photo_url = null;
                         try {
                             JSONObject result = new JSONObject(response);
                             is_matched = result.get("is_matched").toString();
                             name = result.get("name").toString();
-                            System.out.println(is_matched+name);
-                        } catch (JSONException e) {
+                            photo_url = new URL(result.get("photo_url").toString());
+                        } catch (Exception e) {
                             e.printStackTrace();
                         }
+
+
 
                         //send msg to watch if is matched
                         if(is_matched == "true") {
 
+                            //// TODO: 3/4/16
+                            //make the watch vibrate and show name of the matched person
                             WearMsgService.sendMessage("/vibrate", name);
+
+                            // send other information of matched people
+                            WearMsgService.sendMessage("/vibrate", name);
+
+                            // send photo
+                            if(photo_url!= null){
+                                try {
+                                    Bitmap photo = BitmapFactory.decodeStream(photo_url.openConnection().getInputStream());
+                                    Asset asset = createAssetFromBitmap(photo);
+//                                    WearMsgService.sendAssets("/image",asset);
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+
+                            }
+
+
+
+
                         }
                     }
                 }, new Response.ErrorListener() {
@@ -79,5 +108,12 @@ public class PollingService extends Service {
         });
 
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(matchreq);
+    }
+
+
+    private static Asset createAssetFromBitmap(Bitmap bitmap) {
+        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
+        return Asset.createFromBytes(byteStream.toByteArray());
     }
 }

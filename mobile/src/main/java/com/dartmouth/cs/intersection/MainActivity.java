@@ -1,11 +1,11 @@
 package com.dartmouth.cs.intersection;
 
 
-import android.content.SharedPreferences;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
@@ -66,10 +66,6 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
         //initGoogleApiClient();
         startService(new Intent(this, WearMsgService.class));
-        /*if(Global.GACConnected){
-            WearMsgService.sendMessage("/connected", "mobile msg");
-        }*/
-
         gacConnReceiver = new GACConnectedReceiver();
 
         FacebookSdk.sdkInitialize(getApplicationContext());
@@ -104,16 +100,9 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                 //get accessToken
                 mAccessToken = AccessToken.getCurrentAccessToken();
 
-//                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-
-//                //Save access Token and required information in .xml file
-
                 //get a list of installed apps
-                // TODO: 2/28/16 get app's category,http://wheredatapp.com/
                 final PackageManager pm = getPackageManager();
-
                 List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-
                 final ArrayList<String> appList = new ArrayList<String>();
                 JSONArray packagelist = new JSONArray();
 
@@ -126,7 +115,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                     }
                 }
 
-                JSONObject packs = new JSONObject();
+                final JSONObject packs = new JSONObject();
                 try {
                     packs.put("packages",packagelist);
                 } catch (JSONException e) {
@@ -135,46 +124,22 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
 
 //                //send it to http://api.wheredatapp.com/data
-                String key = "438e3a19ff29c8df9fa44e3381d29e347460ca66bba8c46846739925";
-                String appurl = "http://api.wheredatapp.com/data?key="+key;
-                JsonObjectRequest appreq = new JsonObjectRequest(Request.Method.POST, appurl, packs,
-                        new Response.Listener<JSONObject>() {
-                            @Override
-                            public void onResponse(JSONObject response) {
-                                System.out.println(response);
-                            }
-                        }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError error) {
-                        VolleyLog.e(error.toString());
-                    }
-                });
-
-                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(appreq);
-//
-//
-//                // Instantiate the RequestQueue.
-//                RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
-//                String url = "http://intersectionserver-1232.appspot.com/register";
-//
-//                // Request a string response from the provided URL.
-//                StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-//                        new Response.Listener<String>() {
+//                String key = "438e3a19ff29c8df9fa44e3381d29e347460ca66bba8c46846739925";
+//                String appurl = "http://api.wheredatapp.com/data?key="+key;
+//                JsonObjectRequest appreq = new JsonObjectRequest(Request.Method.POST, appurl, packs,
+//                        new Response.Listener<JSONObject>() {
 //                            @Override
-//                            public void onResponse(String response) {
-//                                // Display the first 500 characters of the response string.
+//                            public void onResponse(JSONObject response) {
 //                                System.out.println(response);
 //                            }
 //                        }, new Response.ErrorListener() {
 //                    @Override
 //                    public void onErrorResponse(VolleyError error) {
-//
+//                        VolleyLog.e(error.toString());
 //                    }
 //                });
 //
-//                // Add the request to the RequestQueue.
-//                queue.add(stringRequest);
-
+//                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(appreq);
 
                 try {
                     userINFO.put("FacebookID", mAccessToken.getUserId());
@@ -198,8 +163,6 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                         String imgUrl = "https://graph.facebook.com/"
                                                 + mAccessToken.getUserId() + "/picture?type=large";
                                         userINFO.put("photo URL", imgUrl);
-//                                        //test
-//                                        System.out.println("url"+response.toString());
 
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -214,21 +177,23 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                     GraphResponse response) {
 
                                                 try {
-                                                    if( !object.has("gender")) object.put("gender", "") ;
-                                                    if( !object.has("tagged_places")) object.put("tagged_places", new JSONArray()) ;
-                                                    if( !object.has("music")) object.put("music", new JSONObject().put("data",new JSONArray())) ;
-                                                    if( !object.has("books")) object.put("books", new JSONObject().put("data",new JSONArray())) ;
-                                                    if( !object.has("hometown")) object.put("hometown", new JSONObject()) ;
-                                                    if( !object.has("education")) object.put("education", new JSONArray()) ;
-                                                    if( !object.has("work")) object.put("work", new JSONArray()) ;
+                                                    if( !object.has("gender"))
+                                                        object.put("gender", "") ;
+                                                    if( !object.has("tagged_places"))
+                                                        object.put("tagged_places", new JSONArray()) ;
+                                                    if( !object.has("music"))
+                                                        object.put("music", new JSONObject().put("data",new JSONArray())) ;
+                                                    if( !object.has("books"))
+                                                        object.put("books", new JSONObject().put("data",new JSONArray())) ;
+                                                    if( !object.has("hometown"))
+                                                        object.put("hometown", new JSONObject()) ;
+                                                    if( !object.has("education"))
+                                                        object.put("education", new JSONArray()) ;
+                                                    if( !object.has("work"))
+                                                        object.put("work", new JSONArray()) ;
                                                 } catch (JSONException e) {
                                                     e.printStackTrace();
                                                 }
-
-//                                                //test
-//                                                System.out.println(object);
-//                                                System.out.println("Feedback from fb"+response.toString());
-
 
                                                 try {
                                                     userINFO.put("FBinfo", object);
@@ -237,57 +202,78 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                 }
 
 //                                                //test
+//                                                System.out.println("Feedback from fb"+response.toString());
 //                                                System.out.println("FBinfo"+object.toString());
-//                                                System.out.println("userINFO"+userINFO.toString());
 
-                                                String serverurl =
-                                                        "http://intersectionserver-1232.appspot.com/register";
-                                                JsonObjectRequest req = new JsonObjectRequest(
-                                                        Request.Method.POST, serverurl, userINFO,
+
+                                                //get app types
+                                                String appurl = "http://api.wheredatapp.com/data?key="+Global.APP_QUERY_KEY;
+                                                JsonObjectRequest appreq = new JsonObjectRequest(Request.Method.POST, appurl, packs,
                                                         new Response.Listener<JSONObject>() {
                                                             @Override
                                                             public void onResponse(JSONObject response) {
-                                                                System.out.println(response.toString());
+
                                                                 try {
-                                                                    user_id = response.get("user_id").toString();
+                                                                    userINFO.put("app",response);
                                                                 } catch (JSONException e) {
                                                                     e.printStackTrace();
                                                                 }
 
-                                                                //Save user_id in .xml file
-                                                                SharedPreferences mPreferences
-                                                                        = getSharedPreferences
-                                                                        ("UserInfo", Context.MODE_WORLD_READABLE);
-                                                                SharedPreferences.Editor mEditor
-                                                                        = mPreferences.edit();
+                                                                //test
+                                                                System.out.println("userINFO"+userINFO.toString());
 
-                                                                mEditor.putString("user_id", user_id);
-                                                                mEditor.commit();
+                                                                //send all user info to server for register
+                                                                String serverurl =
+                                                                        "http://intersectionserver-1232.appspot.com/register";
+                                                                JsonObjectRequest req = new JsonObjectRequest(
+                                                                        Request.Method.POST, serverurl, userINFO,
+                                                                        new Response.Listener<JSONObject>() {
+                                                                            @Override
+                                                                            public void onResponse(JSONObject response) {
 
+                                                                                //record id generated by server
+                                                                                try {
+                                                                                    user_id = response.get("user_id").toString();
+                                                                                } catch (JSONException e) {
+                                                                                    e.printStackTrace();
+                                                                                }
 
-                                                                System.out.println(user_id);
+                                                                                //Save user_id in .xml file
+                                                                                SharedPreferences mPreferences
+                                                                                        = getSharedPreferences
+                                                                                        ("UserInfo", Context.MODE_WORLD_READABLE);
+                                                                                SharedPreferences.Editor mEditor
+                                                                                        = mPreferences.edit();
+                                                                                mEditor.putString("user_id", user_id);
+                                                                                mEditor.commit();
 
-                                                                //Send Message to wearable devices
-//                                                                initGoogleApiClient();
-                                                                if(Global.GACConnected) {
-                                                                    WearMsgService.sendMessage("/fbconnected", "mobile msg");
-                                                                }
-                                                                //start update GPS service to server
-                                                                GPSscheduler.setSchedule(getApplicationContext());
+                                                                                //Send Message to wearable devices
+                                                                                if(Global.GACConnected) {
+                                                                                    WearMsgService.sendMessage("/fbconnected", "mobile msg");
+                                                                                }
+                                                                                //start update GPS service to server
+                                                                                GPSscheduler.setSchedule(getApplicationContext());
 
-                                                                //start querying server, every 10 s
-                                                                POLLINGscheduler.setSchedule(getApplicationContext(),60000);
+                                                                                //start querying server, every 10 s
+                                                                                POLLINGscheduler.setSchedule(getApplicationContext(),60000);
 
+                                                                            }
+                                                                        }, new Response.ErrorListener() {
+                                                                    @Override
+                                                                    public void onErrorResponse(VolleyError error) {
+                                                                        System.out.println(error);
+                                                                    }
+                                                                });
+                                                                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
                                                             }
                                                         }, new Response.ErrorListener() {
                                                     @Override
                                                     public void onErrorResponse(VolleyError error) {
-                                                        System.out.println(error);
+                                                        VolleyLog.e(error.toString());
                                                     }
                                                 });
-                                                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
 
-
+                                                VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(appreq);
                                             }
                                         });
                                 Bundle parameters = new Bundle();
@@ -328,13 +314,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 //        //read access token from storage
 //        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_PRIVATE);
 //        String recordedAccessToken = sharedPreferences.getString("AccessToken", "-1");
-//
-//        System.out.println(recordedAccessToken);
-//
-//        //check whether it's the first time of login, if not, show main page
-//        if(recordedAccessToken!="-1"){
-//            showMoreInfo();
-//        }
+
         IntentFilter intentFilter = new IntentFilter(Global.GAC_BROADCAST_FILTER);
         registerReceiver(gacConnReceiver, intentFilter);
     }
@@ -354,74 +334,11 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     }
 
     public class GACConnectedReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context ctx, Intent intent) {
             //WearMsgService.sendMessage("/connected", "mobile msg");
         }
     }
 
-    /*private void initGoogleApiClient() {
-        mApiClient = new GoogleApiClient.Builder( this )
-                .addApi( Wearable.API )
-                .addConnectionCallbacks(this)
-                .addOnConnectionFailedListener(this)
-                .build();
-
-        mApiClient.connect();
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        Wearable.MessageApi.addListener( mApiClient, this );
-        sendMessage("/loginsuess", user_id);
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-        Log.d("12313123", i + "");
-    }
-
-    @Override
-    public void onConnectionFailed(ConnectionResult connectionResult) {
-        Log.e("test", "Failed to connect to Google API Client");
-    }
-
-    private void sendMessage( final String path, final String text ) {
-        new Thread( new Runnable() {
-            @Override
-            public void run() {
-                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( mApiClient ).await();
-                for(Node node : nodes.getNodes()) {
-                    MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
-                            mApiClient, node.getId(), path, text.getBytes() ).await();
-                }
-
-                runOnUiThread( new Runnable() {
-                    @Override
-                    public void run() {
-
-                    }
-                });
-            }
-        }).start();
-    }
-
-    @Override
-    public void onMessageReceived(final MessageEvent messageEvent) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                if (messageEvent.getPath().equalsIgnoreCase(WEAR_MESSAGE_PATH)) {
-                    byte[] bb = messageEvent.getData();
-                    try {
-                        Log.d("Wear received", new String(bb, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                }
-            }
-        });
-    }*/
 }
 

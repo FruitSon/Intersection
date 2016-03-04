@@ -35,6 +35,7 @@ public class WearMsgService extends WearableListenerService implements
 
     private static GoogleApiClient mGoogleApiClient;
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(null == mGoogleApiClient) {
@@ -93,7 +94,8 @@ public class WearMsgService extends WearableListenerService implements
         new Thread( new Runnable() {
             @Override
             public void run() {
-                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi.getConnectedNodes( mGoogleApiClient ).await();
+                NodeApi.GetConnectedNodesResult nodes = Wearable.NodeApi
+                        .getConnectedNodes(mGoogleApiClient).await();
                 for(Node node : nodes.getNodes()) {
                     MessageApi.SendMessageResult result = Wearable.MessageApi.sendMessage(
                             mGoogleApiClient, node.getId(), path, text.getBytes() ).await();
@@ -101,6 +103,7 @@ public class WearMsgService extends WearableListenerService implements
             }
         }).start();
     }
+
 
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
@@ -114,14 +117,16 @@ public class WearMsgService extends WearableListenerService implements
             @Override
             public void run() {
                 Log.d("Wear received", "received");
-                SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
+                SharedPreferences sharedPreferences
+                        = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
                 String user_id = sharedPreferences.getString("user_id", "-1");
 
                 if(messageEvent.getPath().equals("/pairopen")){
                     //set vibrate
 
                         String vibrateurl =
-                                "http://intersectionserver-1232.appspot.com/admin/set_vibrate/" + user_id + "/1";
+                                "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
+                                        + user_id + "/1";
 
                         StringRequest req = new StringRequest(
                                 Request.Method.GET, vibrateurl,
@@ -140,6 +145,8 @@ public class WearMsgService extends WearableListenerService implements
 
                 }
 
+                //// TODO: 3/4/16  add method to receive setting parameters
+
 
                 if (messageEvent.getPath().equalsIgnoreCase(TEST_CONNECT_PATH)) {
 
@@ -149,19 +156,55 @@ public class WearMsgService extends WearableListenerService implements
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
-
-
-                    /*String user_id = null;
-                    try {
-                        user_id = new String(bb, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                    WearMsgService.sendMessage("/received", user_id);*/
                 }
             }
         }).start();
     }
+
+//    public static void sendAssets(final String path, final Asset asset){
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                PutDataRequest photorequest = PutDataRequest.create(path);
+//                photorequest.putAsset("image", asset);
+//                Wearable.DataApi.putDataItem(mGoogleApiClient, photorequest);
+//            }
+//        }).start();
+//    }
+//
+//    @Override
+//    public void onDataChanged(DataEventBuffer dataEvents) {
+//
+//        for (DataEvent event : dataEvents) {
+//            if (event.getType() == DataEvent.TYPE_CHANGED &&
+//                    event.getDataItem().getUri().getPath().equals("/image")) {
+//                DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+//                Asset profileAsset = dataMapItem.getDataMap().getAsset("image");
+//                Bitmap bitmap = loadBitmapFromAsset(profileAsset);
+//                // Do something with the bitmap
+//            }
+//        }
+//
+//    }
+
+//    public Bitmap loadBitmapFromAsset(Asset asset) {
+//        if (asset == null) {
+//            throw new IllegalArgumentException("Asset must be non-null");
+//        }
+//        if(!mGoogleApiClient.isConnected()){
+//            return null;
+//        }
+//        // convert asset into a file descriptor and block until it's ready
+//        InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+//                mGoogleApiClient, asset).await().getInputStream();
+//
+//        if (assetInputStream == null) {
+//            Log.w(TAG, "Requested an unknown Asset.");
+//            return null;
+//        }
+//        // decode the stream into a bitmap
+//        return BitmapFactory.decodeStream(assetInputStream);
+//    }
 
     @Override
     public void onConnected(Bundle bundle) {
