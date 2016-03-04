@@ -2,7 +2,6 @@ package com.dartmouth.cs.intersection;
 
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Vibrator;
@@ -106,6 +105,7 @@ public class WearMsgService extends WearableListenerService implements
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
 
+
         Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
         v.vibrate(1000);
 
@@ -149,6 +149,8 @@ public class WearMsgService extends WearableListenerService implements
                     } catch (UnsupportedEncodingException e) {
                         e.printStackTrace();
                     }
+
+
                     /*String user_id = null;
                     try {
                         user_id = new String(bb, "UTF-8");

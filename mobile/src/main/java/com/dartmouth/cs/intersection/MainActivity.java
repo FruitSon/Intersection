@@ -101,15 +101,12 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                     e.printStackTrace();
                 }
 
-                System.out.println(userINFO);
-
                 //get accessToken
                 mAccessToken = AccessToken.getCurrentAccessToken();
 
 //                final RequestQueue queue = Volley.newRequestQueue(getApplicationContext());
 
 //                //Save access Token and required information in .xml file
-
 
                 //get a list of installed apps
                 // TODO: 2/28/16 get app's category,http://wheredatapp.com/
@@ -129,7 +126,6 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                     }
                 }
 
-
                 JSONObject packs = new JSONObject();
                 try {
                     packs.put("packages",packagelist);
@@ -137,7 +133,6 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                     e.printStackTrace();
                 }
 
-                System.out.println(packs);
 
 //                //send it to http://api.wheredatapp.com/data
                 String key = "438e3a19ff29c8df9fa44e3381d29e347460ca66bba8c46846739925";
@@ -203,7 +198,8 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                         String imgUrl = "https://graph.facebook.com/"
                                                 + mAccessToken.getUserId() + "/picture?type=large";
                                         userINFO.put("photo URL", imgUrl);
-                                        System.out.println("url"+response.toString());
+//                                        //test
+//                                        System.out.println("url"+response.toString());
 
                                     } catch (Exception e) {
                                         e.printStackTrace();
@@ -229,8 +225,9 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                     e.printStackTrace();
                                                 }
 
-                                                System.out.println(object);
-                                                System.out.println("Feedback from fb"+response.toString());
+//                                                //test
+//                                                System.out.println(object);
+//                                                System.out.println("Feedback from fb"+response.toString());
 
 
                                                 try {
@@ -239,8 +236,9 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                     e.printStackTrace();
                                                 }
 
-                                                System.out.println("FBinfo"+object.toString());
-                                                System.out.println("userINFO"+userINFO.toString());
+//                                                //test
+//                                                System.out.println("FBinfo"+object.toString());
+//                                                System.out.println("userINFO"+userINFO.toString());
 
                                                 String serverurl =
                                                         "http://intersectionserver-1232.appspot.com/register";
@@ -265,6 +263,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
                                                                 mEditor.putString("user_id", user_id);
                                                                 mEditor.commit();
+
 
                                                                 System.out.println(user_id);
 

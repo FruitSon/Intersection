@@ -54,6 +54,7 @@ public class PollingService extends Service {
                     public void onResponse(String response) {
                         System.out.println("server response"+response);
                         String is_matched = "false";
+
                         String name = "-1";
                         try {
                             JSONObject result = new JSONObject(response);
@@ -66,6 +67,7 @@ public class PollingService extends Service {
 
                         //send msg to watch if is matched
                         if(is_matched == "true") {
+
                             WearMsgService.sendMessage("/vibrate", name);
                         }
                     }
