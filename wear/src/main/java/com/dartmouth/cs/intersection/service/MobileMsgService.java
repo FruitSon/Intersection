@@ -1,11 +1,9 @@
 package com.dartmouth.cs.intersection.service;
 
 import android.app.PendingIntent;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -212,6 +210,52 @@ public class MobileMsgService extends WearableListenerService implements
             }
         }).start();
     }
+
+
+    //    public static void sendAssets(final String path, final Asset asset){
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                PutDataRequest photorequest = PutDataRequest.create(path);
+//                photorequest.putAsset("image", asset);
+//                Wearable.DataApi.putDataItem(mGoogleApiClient, photorequest);
+//            }
+//        }).start();
+//    }
+//
+//    @Override
+//    public void onDataChanged(DataEventBuffer dataEvents) {
+//
+//        for (DataEvent event : dataEvents) {
+//            if (event.getType() == DataEvent.TYPE_CHANGED &&
+//                    event.getDataItem().getUri().getPath().equals("/image")) {
+//                DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
+//                Asset profileAsset = dataMapItem.getDataMap().getAsset("image");
+//                Bitmap bitmap = loadBitmapFromAsset(profileAsset);
+//                // Do something with the bitmap
+//            }
+//        }
+//
+//    }
+
+//    public Bitmap loadBitmapFromAsset(Asset asset) {
+//        if (asset == null) {
+//            throw new IllegalArgumentException("Asset must be non-null");
+//        }
+//        if(!mGoogleApiClient.isConnected()){
+//            return null;
+//        }
+//        // convert asset into a file descriptor and block until it's ready
+//        InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+//                mGoogleApiClient, asset).await().getInputStream();
+//
+//        if (assetInputStream == null) {
+//            Log.w(TAG, "Requested an unknown Asset.");
+//            return null;
+//        }
+//        // decode the stream into a bitmap
+//        return BitmapFactory.decodeStream(assetInputStream);
+//    }
 
     @Override
     public void onConnected(Bundle bundle) {

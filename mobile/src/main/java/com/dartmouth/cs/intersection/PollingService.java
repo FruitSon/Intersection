@@ -27,6 +27,7 @@ public class PollingService extends Service {
     public PollingService( ) {
     }
 
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -65,13 +66,14 @@ public class PollingService extends Service {
                         try {
                             JSONObject result = new JSONObject(response);
                             is_matched = result.get("is_matched").toString();
-                            name = result.get("name").toString();
-                            photo_url = new URL(result.get("photo_url").toString());
+                            if(is_matched == "true") {
+                                name = result.get("name").toString();
+                                photo_url = new URL(result.get("photo_url").toString());
+                                System.out.println("photourl" + photo_url);
+                            }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
-
 
                         //send msg to watch if is matched
                         if(is_matched == "true") {
@@ -88,14 +90,12 @@ public class PollingService extends Service {
                                 try {
                                     Bitmap photo = BitmapFactory.decodeStream(photo_url.openConnection().getInputStream());
                                     Asset asset = createAssetFromBitmap(photo);
-//                                    WearMsgService.sendAssets("/image",asset);
+                                    WearMsgService.sendAssets("/image",asset);
                                 } catch (IOException e) {
                                     e.printStackTrace();
                                 }
 
                             }
-
-
 
 
                         }
@@ -109,7 +109,6 @@ public class PollingService extends Service {
 
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(matchreq);
     }
-
 
     private static Asset createAssetFromBitmap(Bitmap bitmap) {
         final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();

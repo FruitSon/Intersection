@@ -24,6 +24,11 @@
             android:layout_height="wrap_content"
             android:layout_marginLeft="100dp"
             android:layout_gravity="center" />
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:id="@+id/test" />
     </LinearLayout>
 
 
@@ -33,6 +38,7 @@
         android:layout_height="match_parent"
         android:layout_below="@+id/login"
         android:orientation="horizontal">
+
     </LinearLayout>
 
 

@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.ImageView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -50,10 +51,10 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     private final String WEAR_MESSAGE_PATH = "/connected";
     private GACConnectedReceiver gacConnReceiver;
 
-
     private Scheduler GPSscheduler;
     private Scheduler POLLINGscheduler;
 
+    private ImageView test;
 
     //Mobile - wear connection
     private GoogleApiClient mApiClient;
@@ -64,6 +65,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
         super.onCreate(savedInstanceState);
 
 
+
         //initGoogleApiClient();
         startService(new Intent(this, WearMsgService.class));
         gacConnReceiver = new GACConnectedReceiver();
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
         mCallbackManager = CallbackManager.Factory.create();
 
         setContentView(R.layout.activity_main);
-
+        test = (ImageView) findViewById(R.id.test);
 
         mLoginButton = (LoginButton) findViewById(R.id.login_button);
         List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books",
@@ -305,9 +307,11 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
     }
 
+
     @Override
     protected void onResume(){
         super.onResume();
+
 
         //TODO: 2/29/16 check if the first time of login
 
