@@ -154,7 +154,7 @@ public class WearMsgService extends WearableListenerService implements
                         break;
                     case "/req_score":
                         url = "http://intersectionserver-1232.appspot.com/admin/others_to_grade/"
-                                + user_id + "/5";
+                                + user_id + "/3";
                         break;
                     //接收打分结果
                     case "/get_score":

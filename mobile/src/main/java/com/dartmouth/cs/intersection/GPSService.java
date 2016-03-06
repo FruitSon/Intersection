@@ -83,7 +83,6 @@ public class GPSService extends Service implements LocationListener{
         String user_id = sharedPreferences.getString("user_id", "-1");
 
         String GPSurl = "http://intersectionserver-1232.appspot.com/upload_gps/"+user_id+"/"+latitude+","+longitude;
-        System.out.println(GPSurl);
         StringRequest gpsreq = new StringRequest(Request.Method.GET, GPSurl,
                 new Response.Listener<String>() {
                     @Override

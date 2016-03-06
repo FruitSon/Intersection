@@ -88,7 +88,8 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                 try {
                     userINFO.put("FacebookID","");
                     userINFO.put("AccessToken","");
-                    userINFO.put("Installed App",new JSONArray());
+//                    userINFO.put("Installed App",new JSONArray());
+                    userINFO.put("app",new JSONArray());
                     userINFO.put("photo URL","");
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                 try {
                     userINFO.put("FacebookID", mAccessToken.getUserId());
                     userINFO.put("AccessToken", mAccessToken.getToken());
-                    userINFO.put("Installed App", appList);
+//                    userINFO.put("Installed App", appList);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -210,8 +211,15 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                             @Override
                                                             public void onResponse(JSONObject response) {
 
+                                                                JSONArray jsonArray = null;
                                                                 try {
-                                                                    userINFO.put("app",response);
+                                                                    jsonArray = response.getJSONArray("apps");
+                                                                } catch (JSONException e) {
+                                                                    e.printStackTrace();
+                                                                }
+
+                                                                try {
+                                                                    userINFO.put("app",jsonArray.get(0));
                                                                 } catch (JSONException e) {
                                                                     e.printStackTrace();
                                                                 }
@@ -248,6 +256,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                                                 if(Global.GACConnected) {
                                                                                     WearMsgService.sendMessage("/fbconnected", "mobile msg");
                                                                                 }
+
                                                                                 //start update GPS service to server
                                                                                 GPSscheduler.setSchedule(getApplicationContext());
 
