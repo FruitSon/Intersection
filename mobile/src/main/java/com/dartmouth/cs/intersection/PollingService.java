@@ -54,6 +54,7 @@ public class PollingService extends Service {
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
         String user_id = sharedPreferences.getString("user_id", "-1");
         polling(user_id);
+        System.out.println("user_id:"+ user_id);
         return super.onStartCommand(intent, flags, startId);
     }
 

@@ -56,9 +56,7 @@ public class AudioService extends Service implements MicrophoneRecorder.Micropho
 
     @Override
     public void microphoneBuffer(short[] buffer, int window_size) {
-        int voiced = 0;
         int size = 200;
-
 
         //TODO: Fill out appropriate numbers in the following for loop statement
         for(int k=0;k<200;k+=size){
@@ -107,9 +105,13 @@ public class AudioService extends Service implements MicrophoneRecorder.Micropho
                 String audio;
                 int total = voiced_min+un_voiced_min;
                 double voiced_p = Math.round(voiced_min/total*100)/100.00;
-                double un_voiced_p = Math.round(un_voiced_min/total*100)/100.00;;
-                audio = voiced_p+","+un_voiced_p;
+                audio = String.valueOf(voiced_p);
                 MobileMsgService.sendMessage(Global.AUDIO,audio);
+                un_voiced = 0;
+                voiced = 0;
+                un_voiced_min = 0;
+                voiced_min = 0;
+
             }
 
             public void onTick(long millisUntilFinished) {

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
 import android.view.View;
@@ -18,14 +19,12 @@ import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.RadarData;
 import com.github.mikephil.charting.data.RadarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
-import com.github.mikephil.charting.utils.ColorTemplate;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
-import java.util.Objects;
 
 /**
  * Created by _ReacTor on 16/2/22.
@@ -169,8 +168,8 @@ public class LikeOrNotActivity extends WearableActivity {
             xVals.add(Global.ALL_FEATURES[choosedFeatures.get(i)]);
 
         RadarDataSet set1 = new RadarDataSet(yVals1, "Set 1");
-        set1.setColor(ColorTemplate.VORDIPLOM_COLORS[0]);
-        set1.setFillColor(ColorTemplate.VORDIPLOM_COLORS[0]);
+        set1.setColor(Color.rgb(0, 187, 184));
+        set1.setFillColor(Color.rgb(0, 187, 184));
         set1.setDrawFilled(true);
         set1.setLineWidth(2f);
 
