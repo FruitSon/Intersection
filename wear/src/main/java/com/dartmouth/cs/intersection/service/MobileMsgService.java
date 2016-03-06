@@ -30,9 +30,6 @@ public class MobileMsgService extends WearableListenerService implements
         GoogleApiClient.OnConnectionFailedListener{
     private static final String TAG = "WEAR_LISTENER";
 
-    private final String TEST_CONNECT_PATH = "/connected";
-    private static final String START_ACTIVITY = "/connected";
-
     private static GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -85,33 +82,6 @@ public class MobileMsgService extends WearableListenerService implements
 
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
-       /* int notificationId = 001;
-        String EXTRA_EVENT_ID = "1";
-        int eventId = 2;
-        String eventTitle = "Hello";
-        String eventLocation = "World";
-        // Build intent for notification content
-        Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
-        viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
-        PendingIntent viewPendingIntent =
-                PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
-
-        NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(getApplicationContext())
-                        .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
-                        .setContentTitle(eventTitle)
-                        .setContentText(eventLocation)
-                        .setContentIntent(viewPendingIntent);
-
-        // Get an instance of the NotificationManager service
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(getApplicationContext());
-
-        // Build the notification and issues it with notification manager.
-        notificationManager.notify(notificationId, notificationBuilder.build());*/
-
-        /*Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(1000);*/
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -156,40 +126,7 @@ public class MobileMsgService extends WearableListenerService implements
 
                     // Build the notification and issues it with notification manager.
                     notificationManager.notify(notificationId, notificationBuilder.build());
-
-                    /*byte[] bb = messageEvent.getData();
-                    try {
-                        Log.d("Wear received", new String(bb, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }*/
                 }else{
-
-                    /*int notificationId = 001;
-                    String EXTRA_EVENT_ID = "1";
-                    int eventId = 2;
-                    String eventTitle = "Hello";
-                    String eventLocation = "World";
-                    // Build intent for notification content
-                    Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
-                    viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
-                    PendingIntent viewPendingIntent =
-                            PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
-
-                    NotificationCompat.Builder notificationBuilder =
-                            new NotificationCompat.Builder(getApplicationContext())
-                                    .setSmallIcon(R.drawable.common_plus_signin_btn_icon_dark_normal)
-                                    .setContentTitle(eventTitle)
-                                    .setContentText(eventLocation)
-                                    .setContentIntent(viewPendingIntent);
-
-                    // Get an instance of the NotificationManager service
-                    NotificationManagerCompat notificationManager =
-                            NotificationManagerCompat.from(getApplicationContext());
-
-                    // Build the notification and issues it with notification manager.
-                    notificationManager.notify(notificationId, notificationBuilder.build());*/
-
                     SharedPreferences preferences = getSharedPreferences("settings", 0);
                     SharedPreferences.Editor editor = preferences.edit();
 
@@ -210,52 +147,6 @@ public class MobileMsgService extends WearableListenerService implements
             }
         }).start();
     }
-
-
-    //    public static void sendAssets(final String path, final Asset asset){
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                PutDataRequest photorequest = PutDataRequest.create(path);
-//                photorequest.putAsset("image", asset);
-//                Wearable.DataApi.putDataItem(mGoogleApiClient, photorequest);
-//            }
-//        }).start();
-//    }
-//
-//    @Override
-//    public void onDataChanged(DataEventBuffer dataEvents) {
-//
-//        for (DataEvent event : dataEvents) {
-//            if (event.getType() == DataEvent.TYPE_CHANGED &&
-//                    event.getDataItem().getUri().getPath().equals("/image")) {
-//                DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-//                Asset profileAsset = dataMapItem.getDataMap().getAsset("image");
-//                Bitmap bitmap = loadBitmapFromAsset(profileAsset);
-//                // Do something with the bitmap
-//            }
-//        }
-//
-//    }
-
-//    public Bitmap loadBitmapFromAsset(Asset asset) {
-//        if (asset == null) {
-//            throw new IllegalArgumentException("Asset must be non-null");
-//        }
-//        if(!mGoogleApiClient.isConnected()){
-//            return null;
-//        }
-//        // convert asset into a file descriptor and block until it's ready
-//        InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
-//                mGoogleApiClient, asset).await().getInputStream();
-//
-//        if (assetInputStream == null) {
-//            Log.w(TAG, "Requested an unknown Asset.");
-//            return null;
-//        }
-//        // decode the stream into a bitmap
-//        return BitmapFactory.decodeStream(assetInputStream);
-//    }
 
     @Override
     public void onConnected(Bundle bundle) {
