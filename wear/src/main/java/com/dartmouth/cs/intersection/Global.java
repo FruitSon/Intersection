@@ -4,7 +4,7 @@ package com.dartmouth.cs.intersection;
  * Created by _ReacTor on 16/3/3.
  */
 public class Global {
-    public final static String[] ALL_FEATURES = {"Facebook", "Lifestyle", "Location", "Sports", "App", "Hobbies", "Social"};
+    public final static String[] ALL_FEATURES = {"Experience", "Hobby", "InstalledApps", "Locations", "Sociability", "Sports", "Lifestyle"};
 
     public final static String GAC_BROADCAST_FILTER = "GAC_BROADCAST_FILTER";
     public final static String REQ_SCORE_RECEIVED = "REQ_SCORE_RECEIVED";
