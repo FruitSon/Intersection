@@ -110,7 +110,7 @@ public class MobileMsgService extends WearableListenerService implements
                         break;
 
                     case Global.VIBRATE:
-                        int notificationId = 001;
+                        /*int notificationId = 001;
                         String EXTRA_EVENT_ID = "1";
                         int eventId = 2;
                         byte[] bb = messageEvent.getData();
@@ -128,20 +128,21 @@ public class MobileMsgService extends WearableListenerService implements
                         PendingIntent viewPendingIntent =
                                 PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
 
-                        NotificationCompat.Builder notificationBuilder =
+                        *//*NotificationCompat.Builder notificationBuilder =
                                 new NotificationCompat.Builder(getApplicationContext())
                                         .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
                                         .setContentTitle(eventTitle)
                                         .setContentText(eventLocation)
                                         .setContentIntent(viewPendingIntent)
-                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});;
+                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});*//*
 
                         // Get an instance of the NotificationManager service
                         NotificationManagerCompat notificationManager =
                                 NotificationManagerCompat.from(getApplicationContext());
 
                         // Build the notification and issues it with notification manager.
-                        notificationManager.notify(notificationId, notificationBuilder.build());
+                        //notificationManager.notify(notificationId, notificationBuilder.build());
+                        notificationManager.notify(notificationId, createNotification().build());*/
                         break;
 
                     case Global.INFO_SCORE:
@@ -176,27 +177,17 @@ public class MobileMsgService extends WearableListenerService implements
         }).start();
     }
 
-    //send image
-    public static void sendAssets(final String path, final Asset asset){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                PutDataRequest photorequest = PutDataRequest.create(path);
-                photorequest.putAsset("image", asset);
-                Wearable.DataApi.putDataItem(mGoogleApiClient, photorequest);
-            }
-        }).start();
-    }
 
     @Override
     public void onDataChanged(DataEventBuffer dataEvents) {
+        super.onDataChanged(dataEvents);
 
         for (DataEvent event : dataEvents) {
             if (event.getType() == DataEvent.TYPE_CHANGED &&
                     event.getDataItem().getUri().getPath().equals("/image")) {
+                PutDataRequest dataRequest = PutDataRequest.createFromDataItem(event.getDataItem());
+                Asset profileAsset = dataRequest.getAsset("image");
 
-                DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
-                Asset profileAsset = dataMapItem.getDataMap().getAsset("image");
                 final Bitmap bitmap = loadBitmapFromAsset(profileAsset);
 
                 int seconds = Calendar.getInstance().get(Calendar.SECOND);
@@ -245,16 +236,17 @@ public class MobileMsgService extends WearableListenerService implements
                 .setContentText("")
                 .setSmallIcon(R.drawable.icon)
                 .setStyle(bigPictureStyle)
+                .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
                 .build();
     }
 
 
     @Override
     public void onConnected(Bundle bundle) {
-        Global.GACConnected = true;
+        /*Global.GACConnected = true;
 
         Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
-        sendBroadcast(intent);
+        sendBroadcast(intent);*/
     }
 
     @Override

@@ -54,7 +54,6 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
         public void onReceive(Context ctx, Intent intent) {
             startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
             finish();
-
         }
     }
 }

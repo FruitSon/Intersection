@@ -34,6 +34,8 @@ public class PollingService extends Service {
     private static final int MSG_SUCCESS = 0;
     private static final int MSG_FAIL = 1;
 
+
+
     public PollingService( ) {
     }
 
