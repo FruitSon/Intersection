@@ -19,7 +19,6 @@ public class Scheduler {
 
         // the request code distinguish different stress meter schedule instances
 
-//        Intent intent = new Intent(context, AlarmReceiver.class);
         System.out.println("gpsgpsgps");
         Intent intent = new Intent(context, GPSService.class);
         PendingIntent pi = PendingIntent.getService(context, 10, intent,
