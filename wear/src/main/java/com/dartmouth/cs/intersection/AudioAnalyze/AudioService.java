@@ -21,7 +21,7 @@ public class AudioService extends Service implements MicrophoneRecorder.Micropho
     private int un_voiced = 0;
     private int voiced_min = 0;
     private int un_voiced_min = 0;
-
+    private boolean new_day = false;
 
     public AudioService() {
     }
@@ -100,7 +100,9 @@ public class AudioService extends Service implements MicrophoneRecorder.Micropho
             un_voiced_min = un_voiced_min +1;
         }
 
+
         new CountDownTimer(24*60*60*1000, 1000) {
+
             public void onFinish() {
                 String audio;
                 int total = voiced_min+un_voiced_min;
@@ -112,6 +114,7 @@ public class AudioService extends Service implements MicrophoneRecorder.Micropho
 
             public void onTick(long millisUntilFinished) {
             }
+
         }.start();
 
     }

@@ -30,7 +30,7 @@ public class Scheduler {
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
 
         //RTC_WAKEUP, wake up the device when it goes off.
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 30*1000, pi);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), 5*60*1000, pi);
     }
 
     public static void setSchedule(Context context, int duration) {
