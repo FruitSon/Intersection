@@ -1,6 +1,9 @@
 package com.dartmouth.cs.intersection;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
@@ -17,7 +20,12 @@ import com.github.mikephil.charting.data.RadarDataSet;
 import com.github.mikephil.charting.interfaces.datasets.IRadarDataSet;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Created by _ReacTor on 16/2/22.
@@ -25,11 +33,18 @@ import java.util.ArrayList;
 public class LikeOrNotActivity extends WearableActivity {
 
     private ArrayList<Integer> choosedFeatures = new ArrayList<>();
+    private int userCount = 0;
+    private JSONArray scoreUsers;
 
     private SharedPreferences preferences;
 
     private ImageButton likeBtn;
+    private ImageButton dislikeBtn;
     private RadarChart mChart;
+
+    private int settingStep;
+
+    private ScoreReceiver scoreReceiver;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -38,6 +53,7 @@ public class LikeOrNotActivity extends WearableActivity {
         setContentView(R.layout.activity_like_or_not);
 
         preferences = getSharedPreferences("settings", 0);
+        settingStep = preferences.getInt("SettingSteps", 0);
         String[] savedFeatureArr = preferences.getString("Features", "-1").split(",");
         for(int i = 0; i < savedFeatureArr.length; i++){
             choosedFeatures.add(Integer.parseInt(savedFeatureArr[i]));
@@ -50,13 +66,14 @@ public class LikeOrNotActivity extends WearableActivity {
             }
         }
 
+        scoreReceiver = new ScoreReceiver();
+
+        MobileMsgService.sendMessage(Global.REQ_SCORE, "3");
+
         mChart = (RadarChart) findViewById(R.id.chart);
 
         mChart.setDescription("");
 
-        MobileMsgService.sendMessage(Global.REQ_SCORE, "3");
-        // set the marker to the chart
-        setData();
 
         mChart.animateXY(
                 1400, 1400,
@@ -68,44 +85,74 @@ public class LikeOrNotActivity extends WearableActivity {
 
 
         likeBtn = (ImageButton) findViewById(R.id.button_like);
+        dislikeBtn = (ImageButton) findViewById(R.id.button_dislike);
 
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //TODO: Data
-                MobileMsgService.sendMessage(Global.GET_SCORE, "");
-
-                SharedPreferences preferences = getSharedPreferences("settings", 0);
-
-                int settingStep = preferences.getInt("SettingSteps", 0);
-                if (settingStep < 4) {
-                    SharedPreferences.Editor editor = preferences.edit();
-                    editor.putInt("SettingSteps", 4);
-                    editor.commit();
-                    startActivity(new Intent(LikeOrNotActivity.this, LauncherActivity.class));
-                    finish();
+                try {
+                    sendData("1");
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
+            }
+        });
 
-                if(settingStep == 4){
-                    finish();
+        dislikeBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    sendData("0");
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
             }
         });
     }
 
-    private void setData() {
+    @Override
+    protected void onResume() {
+        super.onResume();
+        IntentFilter intentFilter = new IntentFilter(Global.REQ_SCORE_RECEIVED);
+        registerReceiver(scoreReceiver, intentFilter);
+    }
 
-        float mult = 150;
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(scoreReceiver);
+    }
+
+    private void sendData(String s) throws JSONException {
+        userCount++;
+        MobileMsgService.sendMessage(Global.GET_SCORE, "s");
+
+        if(userCount%3==2){
+            if(settingStep<4){
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putInt("SettingSteps", 4);
+                editor.commit();
+                startActivity(new Intent(LikeOrNotActivity.this, LauncherActivity.class));
+                finish();
+            }
+            MobileMsgService.sendMessage(Global.REQ_SCORE, "3");
+        }else{
+            setData((JSONObject)scoreUsers.get(userCount%3));
+        }
+
+    }
+
+    private void setData(JSONObject scoreData) throws JSONException {
         int cnt = 5;
 
         ArrayList<Entry> yVals1 = new ArrayList<Entry>();
-        ArrayList<Entry> yVals2 = new ArrayList<Entry>();
 
         // IMPORTANT: In a PieChart, no values (Entry) should have the same
         // xIndex (even if from different DataSets), since no values can be
         // drawn above each other.
+        int[] scores = (int[]) scoreData.get("similarities");
         for (int i = 0; i < cnt; i++) {
-            yVals1.add(new Entry((float) (Math.random() * mult) + mult / 2, i));
+            yVals1.add(new Entry((float) scores[choosedFeatures.get(i)], i));
         }
 
         ArrayList<String> xVals = new ArrayList<String>();
@@ -131,5 +178,19 @@ public class LikeOrNotActivity extends WearableActivity {
         mChart.getYAxis().setEnabled(!mChart.getYAxis().isEnabled());
 
         mChart.invalidate();
+    }
+
+    public class ScoreReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context ctx, Intent intent) {
+            String scores = intent.getStringExtra("scores");
+            try {
+                JSONArray users = new JSONArray(scores);
+                scoreUsers = users;
+                setData((JSONObject)scoreUsers.get(userCount%3));
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

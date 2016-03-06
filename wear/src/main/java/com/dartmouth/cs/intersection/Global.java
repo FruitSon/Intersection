@@ -7,6 +7,8 @@ public class Global {
     public final static String[] ALL_FEATURES = {"Facebook", "Lifestyle", "Location", "Sports", "App", "Hobbies", "Social"};
 
     public final static String GAC_BROADCAST_FILTER = "GAC_BROADCAST_FILTER";
+    public final static String REQ_SCORE_RECEIVED = "REQ_SCORE_RECEIVED";
+
     public static boolean GACConnected = false;
 
     public final static String FB_CONNECTED = "/fbconnected";

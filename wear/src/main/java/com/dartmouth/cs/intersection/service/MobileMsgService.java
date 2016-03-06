@@ -29,8 +29,12 @@ import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 
 /**
@@ -102,6 +106,7 @@ public class MobileMsgService extends WearableListenerService implements
                         intent.putExtra("step", 1);
                         sendBroadcast(intent);
                         break;
+
                     case Global.VIBRATE:
                         int notificationId = 001;
                         String EXTRA_EVENT_ID = "1";
@@ -136,8 +141,15 @@ public class MobileMsgService extends WearableListenerService implements
                         // Build the notification and issues it with notification manager.
                         notificationManager.notify(notificationId, notificationBuilder.build());
                         break;
+
                     case Global.INFO_SCORE:
+                        String res = new String(messageEvent.getData(), StandardCharsets.UTF_8);
+
+                        Intent scoreIntent = new Intent(Global.REQ_SCORE_RECEIVED);
+                        scoreIntent.putExtra("scores", res);
+                        sendBroadcast(scoreIntent);
                         break;
+
                     default:
                         SharedPreferences preferences = getSharedPreferences("settings", 0);
                         SharedPreferences.Editor editor = preferences.edit();

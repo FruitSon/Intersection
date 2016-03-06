@@ -41,19 +41,15 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
         super.onResume();
         IntentFilter intentFilter = new IntentFilter(Global.GAC_BROADCAST_FILTER);
         registerReceiver(gacConnReceiver, intentFilter);
-
-
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        //mApiClient.disconnect();
         unregisterReceiver(gacConnReceiver);
     }
 
     public class GACConnectedReceiver extends BroadcastReceiver {
-
         @Override
         public void onReceive(Context ctx, Intent intent) {
             int step = intent.getIntExtra("step", 0);
@@ -63,8 +59,4 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
             }
         }
     }
-
-
-
-
 }
