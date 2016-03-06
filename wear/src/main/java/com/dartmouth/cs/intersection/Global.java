@@ -16,4 +16,6 @@ public class Global {
     public final static String REQ_SCORE = "/req_score";
     public final static String INFO_SCORE = "/info_score";
     public final static String GET_SCORE = "/get_score";
+    public final static String AUDIO = "/update_audio";
+
 }
