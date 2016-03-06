@@ -94,15 +94,14 @@ public class LauncherActivity extends WearableActivity {
         }
     }
 
-    public class GACConnectedReceiver extends BroadcastReceiver {
+    /*public class GACConnectedReceiver extends BroadcastReceiver {
 
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            //MobileMsgService.sendMessage("/connected", "mobile msg");
             int step = intent.getIntExtra("step", 0);
             if(step == 1){
                 startActivity(new Intent(LauncherActivity.this, FeaturesActivity.class));
             }
         }
-    }
+    }*/
 }

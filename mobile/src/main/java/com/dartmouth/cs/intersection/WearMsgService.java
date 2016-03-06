@@ -176,7 +176,7 @@ public class WearMsgService extends WearableListenerService implements
                                     @Override
                                     public void onResponse(String response) {
                                         if(messageEvent.getPath().equals("/req_score")){
-                                            sendMessage("/info_score" ,response);
+                                            sendMessage("/info_score",response);
                                         }
                                     }
                                 }, new Response.ErrorListener() {
