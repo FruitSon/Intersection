@@ -156,10 +156,15 @@ public class WearMsgService extends WearableListenerService implements
                         url = "http://intersectionserver-1232.appspot.com/others_to_grade/"
                                 + user_id + "/3";
                         break;
-                    //接收打分结果
+                    //// TODO: 接收打分结果
                     case "/get_score":
                         url = "http://intersectionserver-1232.appspot.com/others_to_grade/"
                                 + user_id + "/"+res;
+
+                        break;
+                    //// TODO: 上传录音结果
+                    case "/update_audio":
+                        url = "";
                         break;
                     default:
                         break;
