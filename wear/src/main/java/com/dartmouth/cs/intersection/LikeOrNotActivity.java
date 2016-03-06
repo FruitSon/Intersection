@@ -150,9 +150,17 @@ public class LikeOrNotActivity extends WearableActivity {
         // IMPORTANT: In a PieChart, no values (Entry) should have the same
         // xIndex (even if from different DataSets), since no values can be
         // drawn above each other.
-        int[] scores = (int[]) scoreData.get("similarities");
+        ArrayList list = new ArrayList<>();
+        Object obj = scoreData.get("similarities");
+        JSONArray jsonArray = (JSONArray)obj;
+        if (jsonArray != null) {
+            int len = jsonArray.length();
+            for (int i=0;i<len;i++){
+                list.add(jsonArray.get(i));
+            }
+        }
         for (int i = 0; i < cnt; i++) {
-            yVals1.add(new Entry((float) scores[choosedFeatures.get(i)], i));
+            yVals1.add(new Entry((int)list.get(choosedFeatures.get(i)), i));
         }
 
         ArrayList<String> xVals = new ArrayList<String>();
@@ -175,7 +183,7 @@ public class LikeOrNotActivity extends WearableActivity {
         data.setDrawValues(false);
 
         mChart.setData(data);
-        mChart.getYAxis().setEnabled(!mChart.getYAxis().isEnabled());
+        mChart.getYAxis().setEnabled(false);
 
         mChart.invalidate();
     }
