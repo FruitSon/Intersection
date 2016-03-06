@@ -133,6 +133,7 @@ public class MobileMsgService extends WearableListenerService implements
                     sendBroadcast(intent);
                 } else if (messageEvent.getPath().equalsIgnoreCase(Global.VIBRATE)) {
 
+                
 
 
                     int notificationId = 001;

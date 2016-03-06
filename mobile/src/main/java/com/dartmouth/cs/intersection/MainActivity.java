@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
         List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books",
                 "user_actions.music", "user_education_history", "user_games_activity",
                 "user_hometown", "user_location", "user_tagged_places", "user_work_history",
-                "user_photos", "public_profile");
+                "user_photos", "public_profile","user_likes");
         mLoginButton.setReadPermissions(permissionNeeds);
 
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -311,7 +311,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
         AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
-                if(currentAccessToken == null) WearMsgService.sendMessage("/reset","reset");
+                if(currentAccessToken == null) WearMsgService.sendMessage("/default","reset");
             }
         };
 

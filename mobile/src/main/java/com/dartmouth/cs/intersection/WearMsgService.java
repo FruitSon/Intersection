@@ -152,13 +152,14 @@ public class WearMsgService extends WearableListenerService implements
                         url = "http://intersectionserver-1232.appspot.com/admin/set_willing/"
                                 + user_id + "/"+ res;
                         break;
-                    case "/scoreinfo":
-                        url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
-                                + user_id + "/"+ res;
-                        break;
-                    case "/scorereqest":
+                    case "/req_score":
                         url = "http://intersectionserver-1232.appspot.com/admin/others_to_grade/"
                                 + user_id + "/5";
+                        break;
+                    //接收打分结果
+                    case "/get_score":
+                        url = "http://intersectionserver-1232.appspot.com/admin/others_to_grade/"
+                                + user_id + "/"+res;
                         break;
                     default:
                         break;
@@ -171,14 +172,14 @@ public class WearMsgService extends WearableListenerService implements
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-                                        if(messageEvent.getPath().equals("/scorerequest")){
-                                            sendMessage("scoreinfo",response);
+                                        if(messageEvent.getPath().equals("/req_score")){
+                                            sendMessage("/info_score" ,response);
                                         }
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
                             public void onErrorResponse(VolleyError error) {
-                                System.out.println(error);
+                                error.printStackTrace();
                             }
                         });
                         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
