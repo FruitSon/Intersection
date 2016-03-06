@@ -43,11 +43,6 @@ public class FeaturesActivity extends WearableActivity {
         preferences = getSharedPreferences("settings", 0);
         String[] savedFeatureArr = preferences.getString("Features", "-1").split(",");
 
-        startService(new Intent(this, MobileMsgService.class));
-        if (Global.GACConnected){
-            //MobileMsgService.sendMessage("/connected", "wear msg");
-        }
-
         mListView = (ListView) findViewById(R.id.listview_features);
         listAdapter = new FeatureListAdapter(this, 0);
         for (String num: savedFeatureArr) {
@@ -75,20 +70,26 @@ public class FeaturesActivity extends WearableActivity {
                     }
                 }
 
+                if(featureSet.size()<3){
+                    Toast.makeText(FeaturesActivity.this, "Please Add 3 features", Toast.LENGTH_SHORT).show();
+                    return;
+                }
 
                 SharedPreferences.Editor editor = preferences.edit();
                 Iterator<String> i = featureSet.iterator();
                 String features = "";
+
                 while(i.hasNext()){
                     features+=i.next()+",";
                 }
                 if(features.charAt(features.length()-1) == ','){
                     features = features.substring(0,features.length()-1);
                 }
-                Log.d("Feature Arr", features);
                 editor.putString("Features", features);
 
                 int settingStep = preferences.getInt("SettingSteps", 0);
+
+                MobileMsgService.sendMessage(Global.FEATURES, features);
 
                 if(settingStep < 2) {
                     editor.putInt("SettingSteps", 2);
@@ -97,26 +98,13 @@ public class FeaturesActivity extends WearableActivity {
                     finish();
                 }
 
+                //TODO: startFragment?
                 if(settingStep == 4){
-                    finish();
                     editor.commit();
+                    finish();
                 }
             }
         });
     }
 
-    /*public void OnCheckBoxClicked(View v){
-        CheckBox checkBox = (CheckBox) v;
-        if(!checkBox.isChecked()){
-            selectedFeatures --;
-            return;
-        }
-
-        if(selectedFeatures < 3) {
-            selectedFeatures++;
-        }else{
-            Toast.makeText(this, "Limit Reached", Toast.LENGTH_LONG).show();
-            checkBox.toggle();
-        }
-    }*/
 }

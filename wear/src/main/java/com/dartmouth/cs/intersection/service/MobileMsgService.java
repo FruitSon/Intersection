@@ -41,9 +41,6 @@ public class MobileMsgService extends WearableListenerService implements
         GoogleApiClient.OnConnectionFailedListener{
     private static final String TAG = "WEAR_LISTENER";
 
-    private final String TEST_CONNECT_PATH = "/connected";
-    private static final String START_ACTIVITY = "/connected";
-
     private static GoogleApiClient mGoogleApiClient;
 
     @Override
@@ -96,129 +93,71 @@ public class MobileMsgService extends WearableListenerService implements
 
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
-       /* int notificationId = 001;
-        String EXTRA_EVENT_ID = "1";
-        int eventId = 2;
-        String eventTitle = "Hello";
-        String eventLocation = "World";
-        // Build intent for notification content
-        Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
-        viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
-        PendingIntent viewPendingIntent =
-                PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
-
-        NotificationCompat.Builder notificationBuilder =
-                new NotificationCompat.Builder(getApplicationContext())
-                        .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
-                        .setContentTitle(eventTitle)
-                        .setContentText(eventLocation)
-                        .setContentIntent(viewPendingIntent);
-
-        // Get an instance of the NotificationManager service
-        NotificationManagerCompat notificationManager =
-                NotificationManagerCompat.from(getApplicationContext());
-
-        // Build the notification and issues it with notification manager.
-        notificationManager.notify(notificationId, notificationBuilder.build());*/
-
-        /*Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(1000);*/
         new Thread(new Runnable() {
             @Override
             public void run() {
-                if(messageEvent.getPath().equalsIgnoreCase(Global.FB_CONNECTED)){
-                    //startActivity(new Intent(getApplicationContext(), FeaturesActivity.class));
-                    Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
-                    intent.putExtra("step", 1);
-                    sendBroadcast(intent);
-                } else if (messageEvent.getPath().equalsIgnoreCase(Global.VIBRATE)) {
+                switch (messageEvent.getPath()){
+                    case Global.FB_CONNECTED:
+                        Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
+                        intent.putExtra("step", 1);
+                        sendBroadcast(intent);
+                        break;
+                    case Global.VIBRATE:
+                        int notificationId = 001;
+                        String EXTRA_EVENT_ID = "1";
+                        int eventId = 2;
+                        byte[] bb = messageEvent.getData();
+                        String eventTitle = "";
+                        try {
+                            eventTitle =  new String(bb, "UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
 
-                
+                        String eventLocation = "Hello";
+                        // Build intent for notification content
+                        Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
+                        viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
+                        PendingIntent viewPendingIntent =
+                                PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
 
+                        NotificationCompat.Builder notificationBuilder =
+                                new NotificationCompat.Builder(getApplicationContext())
+                                        .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
+                                        .setContentTitle(eventTitle)
+                                        .setContentText(eventLocation)
+                                        .setContentIntent(viewPendingIntent)
+                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});;
 
-                    int notificationId = 001;
-                    String EXTRA_EVENT_ID = "1";
-                    int eventId = 2;
-                    byte[] bb = messageEvent.getData();
-                    String eventTitle = "";
-                    try {
-                        eventTitle =  new String(bb, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
+                        // Get an instance of the NotificationManager service
+                        NotificationManagerCompat notificationManager =
+                                NotificationManagerCompat.from(getApplicationContext());
 
-                    String eventLocation = "Hello";
-                    // Build intent for notification content
-                    Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
-                    viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
-                    PendingIntent viewPendingIntent =
-                            PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
+                        // Build the notification and issues it with notification manager.
+                        notificationManager.notify(notificationId, notificationBuilder.build());
+                        break;
+                    case Global.INFO_SCORE:
+                        break;
+                    default:
+                        SharedPreferences preferences = getSharedPreferences("settings", 0);
+                        SharedPreferences.Editor editor = preferences.edit();
 
-                    NotificationCompat.Builder notificationBuilder =
-                            new NotificationCompat.Builder(getApplicationContext())
-                                    .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
-                                    .setContentTitle(eventTitle)
-                                    .setContentText(eventLocation)
-                                    .setContentIntent(viewPendingIntent)
-                                    .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});;
+                        editor.putInt("SettingSteps", 1);
+                        editor.commit();
 
-                    // Get an instance of the NotificationManager service
-                    NotificationManagerCompat notificationManager =
-                            NotificationManagerCompat.from(getApplicationContext());
+                        startActivity(new Intent(getApplicationContext(), FeaturesActivity.class));
 
-                    // Build the notification and issues it with notification manager.
-                    notificationManager.notify(notificationId, notificationBuilder.build());
-
-                    /*byte[] bb = messageEvent.getData();
-                    try {
-                        Log.d("Wear received", new String(bb, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }*/
-                }else{
-
-                    /*int notificationId = 001;
-                    String EXTRA_EVENT_ID = "1";
-                    int eventId = 2;
-                    String eventTitle = "Hello";
-                    String eventLocation = "World";
-                    // Build intent for notification content
-                    Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
-                    viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
-                    PendingIntent viewPendingIntent =
-                            PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
-
-                    NotificationCompat.Builder notificationBuilder =
-                            new NotificationCompat.Builder(getApplicationContext())
-                                    .setSmallIcon(R.drawable.common_plus_signin_btn_icon_dark_normal)
-                                    .setContentTitle(eventTitle)
-                                    .setContentText(eventLocation)
-                                    .setContentIntent(viewPendingIntent);
-
-                    // Get an instance of the NotificationManager service
-                    NotificationManagerCompat notificationManager =
-                            NotificationManagerCompat.from(getApplicationContext());
-
-                    // Build the notification and issues it with notification manager.
-                    notificationManager.notify(notificationId, notificationBuilder.build());*/
-
-                    SharedPreferences preferences = getSharedPreferences("settings", 0);
-                    SharedPreferences.Editor editor = preferences.edit();
-
-                    editor.putInt("SettingSteps", 1);
-                    editor.commit();
-
-                    startActivity(new Intent(getApplicationContext(), FeaturesActivity.class));
-
-                    byte[] bb = messageEvent.getData();
-                    String user_id = null;
-                    try {
-                        user_id = new String(bb, "UTF-8");
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
-                    MobileMsgService.sendMessage("/received", user_id);
+                        byte[] b1 = messageEvent.getData();
+                        String user_id = null;
+                        try {
+                            user_id = new String(b1, "UTF-8");
+                        } catch (UnsupportedEncodingException e) {
+                            e.printStackTrace();
+                        }
+                        MobileMsgService.sendMessage("/received", user_id);
+                        break;
                 }
+
             }
         }).start();
     }

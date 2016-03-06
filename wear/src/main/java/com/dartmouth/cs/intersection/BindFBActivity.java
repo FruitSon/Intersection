@@ -33,12 +33,7 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
         setContentView(R.layout.activity_bindfb);
         mContext = this;
 
-
         gacConnReceiver = new GACConnectedReceiver();
-        //initGoogleApiClient();
-
-        /*startService(new Intent(this, MobileMsgService.class));
-        MobileMsgService.sendMessage("/connected", "wear msg");*/
     }
 
     @Override
@@ -48,9 +43,6 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
         registerReceiver(gacConnReceiver, intentFilter);
 
 
-        /*if (Global.GACConnected){
-            MobileMsgService.sendMessage("/connected", "wear msg");
-        }*/
     }
 
     @Override
@@ -64,7 +56,6 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
 
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            //MobileMsgService.sendMessage("/connected", "mobile msg");
             int step = intent.getIntExtra("step", 0);
             if(step == 1){
                 startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
@@ -72,30 +63,6 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
             }
         }
     }
-
-    /*private void initGoogleApiClient() {
-        mApiClient = new GoogleApiClient.Builder( this )
-                .addApi( Wearable.API )
-                .addConnectionCallbacks(this)
-                .build();
-
-        if(!mApiClient.isConnected()) {
-            mApiClient.connect();
-            Log.v("GAC", "Connecting to GoogleApiClient..");
-        }
-
-        startService(new Intent(this, MobileMsgService.class));
-    }
-
-    @Override
-    public void onConnected(Bundle bundle) {
-        MobileMsgService.sendMessage("/connected", "wear msg");
-    }
-
-    @Override
-    public void onConnectionSuspended(int i) {
-
-    }*/
 
 
 
