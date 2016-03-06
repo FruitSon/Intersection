@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 
 import com.dartmouth.cs.intersection.FeaturesActivity;
+import com.dartmouth.cs.intersection.Global;
 import com.dartmouth.cs.intersection.R;
 
 
@@ -19,7 +20,6 @@ import com.dartmouth.cs.intersection.R;
  */
 public class FeatureListAdapter extends ArrayAdapter<String>{
     private Context context;
-    private String[] values = {"Facebook", "Lifestyle", "Location", "Sports", "App", "Hobbies", "Social"};
     public static final boolean[] isSetted = {false, false, false, false, false, false, false};
 
     public FeatureListAdapter(Context context, int resource) {
@@ -34,7 +34,7 @@ public class FeatureListAdapter extends ArrayAdapter<String>{
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View v = inflater.inflate(R.layout.list_checkbox, null);
         final CheckBox mCheckBox = (CheckBox) v.findViewById(R.id.checkbox);
-        mCheckBox.setText(values[position]);
+        mCheckBox.setText(Global.ALL_FEATURES[position]);
 
         mCheckBox.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -63,7 +63,7 @@ public class FeatureListAdapter extends ArrayAdapter<String>{
 
     @Override
     public int getCount() {
-        return values.length;
+        return Global.ALL_FEATURES.length;
     }
 
     @Override

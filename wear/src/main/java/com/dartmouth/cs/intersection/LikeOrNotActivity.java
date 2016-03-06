@@ -7,11 +7,10 @@ import android.support.wearable.activity.WearableActivity;
 import android.view.View;
 import android.widget.ImageButton;
 
+import com.dartmouth.cs.intersection.service.MobileMsgService;
 import com.github.mikephil.charting.animation.Easing;
 import com.github.mikephil.charting.charts.RadarChart;
-import com.github.mikephil.charting.components.Legend;
 import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.RadarData;
 import com.github.mikephil.charting.data.RadarDataSet;
@@ -25,6 +24,10 @@ import java.util.ArrayList;
  */
 public class LikeOrNotActivity extends WearableActivity {
 
+    private ArrayList<Integer> choosedFeatures = new ArrayList<>();
+
+    private SharedPreferences preferences;
+
     private ImageButton likeBtn;
     private RadarChart mChart;
 
@@ -34,17 +37,25 @@ public class LikeOrNotActivity extends WearableActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_like_or_not);
 
+        preferences = getSharedPreferences("settings", 0);
+        String[] savedFeatureArr = preferences.getString("Features", "-1").split(",");
+        for(int i = 0; i < savedFeatureArr.length; i++){
+            choosedFeatures.add(Integer.parseInt(savedFeatureArr[i]));
+        }
+
+        while (choosedFeatures.size()<5) {
+            int random = (int)(Math.random() * 6 + 1);
+            if(choosedFeatures.indexOf(random) == -1){
+                choosedFeatures.add(random);
+            }
+        }
+
         mChart = (RadarChart) findViewById(R.id.chart);
 
         mChart.setDescription("");
 
-        /*mChart.setWebLineWidth(1.5f);
-        mChart.setWebLineWidthInner(0.75f);
-        mChart.setWebAlpha(100);*/
-
-
+        MobileMsgService.sendMessage(Global.REQ_SCORE, "3");
         // set the marker to the chart
-
         setData();
 
         mChart.animateXY(
@@ -55,21 +66,15 @@ public class LikeOrNotActivity extends WearableActivity {
         XAxis xAxis = mChart.getXAxis();
         xAxis.setTextSize(9f);
 
-        //YAxis yAxis = mChart.getYAxis();
-        /*yAxis.setLabelCount(5, false);
-        yAxis.setTextSize(9f);
-        yAxis.setAxisMinValue(0f);*/
-
-        /*Legend l = mChart.getLegend();
-        l.setPosition(Legend.LegendPosition.RIGHT_OF_CHART);
-        l.setXEntrySpace(7f);*/
-        //l.setYEntrySpace(5f);
 
         likeBtn = (ImageButton) findViewById(R.id.button_like);
 
         likeBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //TODO: Data
+                MobileMsgService.sendMessage(Global.GET_SCORE, "");
+
                 SharedPreferences preferences = getSharedPreferences("settings", 0);
 
                 int settingStep = preferences.getInt("SettingSteps", 0);
@@ -87,10 +92,6 @@ public class LikeOrNotActivity extends WearableActivity {
             }
         });
     }
-
-    private String[] mParties = new String[]{
-            "Sports", "LifeStyle", "Hobby", "Facebook", "Location"
-    };
 
     private void setData() {
 
@@ -110,7 +111,7 @@ public class LikeOrNotActivity extends WearableActivity {
         ArrayList<String> xVals = new ArrayList<String>();
 
         for (int i = 0; i < cnt; i++)
-            xVals.add(mParties[i % mParties.length]);
+            xVals.add(Global.ALL_FEATURES[choosedFeatures.get(i)]);
 
         RadarDataSet set1 = new RadarDataSet(yVals1, "Set 1");
         set1.setColor(ColorTemplate.VORDIPLOM_COLORS[0]);

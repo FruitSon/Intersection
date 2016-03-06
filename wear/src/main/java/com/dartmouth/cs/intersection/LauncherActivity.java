@@ -34,10 +34,6 @@ public class LauncherActivity extends WearableActivity {
 
         SharedPreferences preferences = getSharedPreferences("settings", 0);
         startService(new Intent(this, MobileMsgService.class));
-        /*SharedPreferences.Editor editor = preferences.edit();
-
-        editor.putInt("SettingSteps", 0);
-        editor.commit();*/
 
         switch (preferences.getInt("SettingSteps", 0)){
             case 0:
