@@ -230,8 +230,9 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 //                                                                System.out.println("userINFO"+userINFO.toString());
 
                                                                 //send all user info to server for register
-                                                                String serverurl =
-                                                                        "http://intersectionserver-1232.appspot.com/register";
+//                                                                String serverurl =
+//                                                                        "http://intersectionserver-1232.appspot.com/register";
+                                                                String serverurl = "http://129.170.212.221:8080/register";
                                                                 JsonObjectRequest req = new JsonObjectRequest(
                                                                         Request.Method.POST, serverurl, userINFO,
                                                                         new Response.Listener<JSONObject>() {
