@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.ImageView;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -19,6 +18,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.facebook.AccessToken;
+import com.facebook.AccessTokenTracker;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
@@ -40,8 +40,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity /*implements MessageApi.MessageListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener*/{
 
-    private boolean userSkippedLogin = false;
-
     private MainFragment mainPage;
 
     protected LoginButton mLoginButton;
@@ -53,8 +51,6 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 
     private Scheduler GPSscheduler;
     private Scheduler POLLINGscheduler;
-
-    private ImageView test;
 
     //Mobile - wear connection
     private GoogleApiClient mApiClient;
@@ -74,7 +70,6 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
         mCallbackManager = CallbackManager.Factory.create();
 
         setContentView(R.layout.activity_main);
-        test = (ImageView) findViewById(R.id.test);
 
         mLoginButton = (LoginButton) findViewById(R.id.login_button);
         List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books",
@@ -105,7 +100,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                 //get a list of installed apps
                 final PackageManager pm = getPackageManager();
                 List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
-                final ArrayList<String> appList = new ArrayList<String>();
+                final ArrayList<String> appList = new ArrayList<>();
                 JSONArray packagelist = new JSONArray();
 
                 for (ApplicationInfo p : packages) {
@@ -163,7 +158,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                 if (response != null) {
                                     try {
                                         String imgUrl = "https://graph.facebook.com/"
-                                                + mAccessToken.getUserId() + "/picture?type=large";
+                                                + mAccessToken.getUserId() + "/picture?type=small";
                                         userINFO.put("photo URL", imgUrl);
 
                                     } catch (Exception e) {
@@ -263,7 +258,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                                         }, new Response.ErrorListener() {
                                                                     @Override
                                                                     public void onErrorResponse(VolleyError error) {
-                                                                        System.out.println(error);
+                                                                        error.printStackTrace();
                                                                     }
                                                                 });
                                                                 VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
@@ -287,6 +282,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                         }
                 ).executeAsync();
             }
+
 
             @Override
             public void onCancel() {
@@ -312,8 +308,12 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     protected void onResume(){
         super.onResume();
 
-
-        //TODO: 2/29/16 check if the first time of login
+        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                if(currentAccessToken == null) WearMsgService.sendMessage("/reset","reset");
+            }
+        };
 
 //        //read access token from storage
 //        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_PRIVATE);
@@ -327,6 +327,10 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(gacConnReceiver);
+
+        stopService(new Intent(this, GPSService.class));
+        stopService(new Intent(this,PollingService.class));
+
         /*mApiClient.disconnect();*/
     }
 

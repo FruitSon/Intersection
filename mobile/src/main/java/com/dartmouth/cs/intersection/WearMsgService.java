@@ -1,12 +1,15 @@
 package com.dartmouth.cs.intersection;
 
+import android.app.Notification;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Vibrator;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.android.volley.Request;
@@ -28,7 +31,8 @@ import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
 
 /**
  * Created by _ReacTor on 16/3/2.
@@ -128,20 +132,48 @@ public class WearMsgService extends WearableListenerService implements
                 SharedPreferences sharedPreferences
                         = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
                 String user_id = sharedPreferences.getString("user_id", "-1");
+                String url = null;
+                String res = new String(messageEvent.getData(), StandardCharsets.UTF_8);
 
-                if(messageEvent.getPath().equals("/pairopen")){
-                    //set vibrate
+                switch (messageEvent.getPath()) {
+                    case "/pairopen":
+                        url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
+                                + user_id + "/1";
+                        break;
+                    case "/logged":
+                        url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
+                                + user_id + "/1";
+                        break;
+                    case "/feature":
+                        url = "http://intersectionserver-1232.appspot.com/set_features/"
+                                + user_id + "/"+ res;
+                        break;
+                    case "/willing":
+                        url = "http://intersectionserver-1232.appspot.com/admin/set_willing/"
+                                + user_id + "/"+ res;
+                        break;
+                    case "/scoreinfo":
+                        url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
+                                + user_id + "/"+ res;
+                        break;
+                    case "/scorereqest":
+                        url = "http://intersectionserver-1232.appspot.com/admin/others_to_grade/"
+                                + user_id + "/5";
+                        break;
+                    default:
+                        break;
+                }
 
-                        String vibrateurl =
-                                "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
-                                        + user_id + "/1";
+                if(url!=null){
 
                         StringRequest req = new StringRequest(
-                                Request.Method.GET, vibrateurl,
+                                Request.Method.GET, url,
                                 new Response.Listener<String>() {
                                     @Override
                                     public void onResponse(String response) {
-
+                                        if(messageEvent.getPath().equals("/scorerequest")){
+                                            sendMessage("scoreinfo",response);
+                                        }
                                     }
                                 }, new Response.ErrorListener() {
                             @Override
@@ -150,20 +182,6 @@ public class WearMsgService extends WearableListenerService implements
                             }
                         });
                         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(req);
-
-                }
-
-                //// TODO: 3/4/16  add method to receive setting parameters
-
-
-                if (messageEvent.getPath().equalsIgnoreCase(TEST_CONNECT_PATH)) {
-
-                    byte[] bb = messageEvent.getData();
-                    try {
-                        Log.d("Wear received", new String(bb, "UTF-8"));
-                    } catch (UnsupportedEncodingException e) {
-                        e.printStackTrace();
-                    }
                 }
             }
         }).start();
@@ -188,13 +206,26 @@ public class WearMsgService extends WearableListenerService implements
         for (DataEvent event : dataEvents) {
             if (event.getType() == DataEvent.TYPE_CHANGED &&
                     event.getDataItem().getUri().getPath().equals("/image")) {
+
                 DataMapItem dataMapItem = DataMapItem.fromDataItem(event.getDataItem());
                 Asset profileAsset = dataMapItem.getDataMap().getAsset("image");
-                Bitmap bitmap = loadBitmapFromAsset(profileAsset);
-                // Do something with the bitmap
+                final Bitmap bitmap = loadBitmapFromAsset(profileAsset);
+
+                int seconds = Calendar.getInstance().get(Calendar.SECOND);
+                int pending ;
+                if(seconds<30) pending = 30-seconds;
+                else pending = 60 - seconds;
+                new CountDownTimer(pending*1000, 1000) {
+                    public void onFinish() {
+                        createNotification(bitmap);
+                    }
+
+                    public void onTick(long millisUntilFinished) {
+                    }
+                }.start();
+
             }
         }
-
     }
 
     public Bitmap loadBitmapFromAsset(Asset asset) {
@@ -214,6 +245,19 @@ public class WearMsgService extends WearableListenerService implements
         }
         // decode the stream into a bitmap
         return BitmapFactory.decodeStream(assetInputStream);
+    }
+
+    //Create a BigPictureStyle notification that displays the image.
+    private Notification createNotification(Bitmap image) {
+        NotificationCompat.BigPictureStyle bigPictureStyle
+                = new NotificationCompat.BigPictureStyle()
+                .bigPicture(image);
+        return new NotificationCompat.Builder(this)
+                .setContentTitle("Image Received")
+                .setContentText("")
+                .setSmallIcon(R.drawable.icon)
+                .setStyle(bigPictureStyle)
+                .build();
     }
 
     @Override

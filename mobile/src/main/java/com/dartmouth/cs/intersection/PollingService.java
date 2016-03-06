@@ -5,7 +5,10 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
+import android.os.Message;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Request;
@@ -23,6 +26,13 @@ import java.net.URL;
 
 public class PollingService extends Service {
 
+    private String is_matched = "false";
+    private String name = "";
+    private URL photo_url = null;
+    private Bitmap photo = null;
+    private Bundle bundle = new Bundle();
+    private static final int MSG_SUCCESS = 0;
+    private static final int MSG_FAIL = 1;
 
     public PollingService( ) {
     }
@@ -53,6 +63,27 @@ public class PollingService extends Service {
         return null;
     }
 
+    private Handler mHandler = new Handler() {
+        public void handleMessage (Message msg) {
+            switch(msg.what) {
+                case MSG_SUCCESS:
+                    Bundle received = (Bundle) msg.obj;
+                    Bitmap image = received.getParcelable("image");
+                    String n = received.getString("name");
+                    Asset asset = createAssetFromBitmap(image);
+                    WearMsgService.sendMessage("/vibrate",n);
+                    WearMsgService.sendAssets("/image", asset);
+
+                    break;
+
+                //没有图片- -
+                case MSG_FAIL:
+//                  WearMsgService.sendMessage("/vibrate", name);
+                    break;
+            }
+        }
+    };
+
     public void polling(String id){
         String Pollingurl = "http://intersectionserver-1232.appspot.com/is_matched/"+id;
         StringRequest matchreq = new StringRequest(Request.Method.GET, Pollingurl,
@@ -60,45 +91,38 @@ public class PollingService extends Service {
                     @Override
                     public void onResponse(String response) {
                         System.out.println("server response"+response);
-                        String is_matched = "false";
-                        String name = "-1";
-                        URL photo_url = null;
                         try {
                             JSONObject result = new JSONObject(response);
                             is_matched = result.get("is_matched").toString();
                             if(is_matched == "true") {
                                 name = result.get("name").toString();
                                 photo_url = new URL(result.get("photo_url").toString());
-                                System.out.println("photourl" + photo_url);
+
+                                //send msg to watch if is matched
+                                new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if(photo_url!= null){
+                                            try {
+                                                photo = BitmapFactory.decodeStream(photo_url.openConnection().getInputStream());
+                                                bundle.putParcelable("image",photo);
+                                                bundle.putString("name",name);
+                                                mHandler.obtainMessage(MSG_SUCCESS,bundle).sendToTarget();
+                                            } catch (IOException e) {
+                                                mHandler.obtainMessage(MSG_FAIL).sendToTarget();
+                                                e.printStackTrace();
+                                            }
+
+                                        }
+                                    }
+                                }).start();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
 
-                        //send msg to watch if is matched
-                        if(is_matched == "true") {
-
-                            //// TODO: 3/4/16
-                            //make the watch vibrate and show name of the matched person
-                            WearMsgService.sendMessage("/vibrate", name);
-
-                            // send other information of matched people
-                            WearMsgService.sendMessage("/vibrate", name);
-
-                            // send photo
-                            if(photo_url!= null){
-                                try {
-                                    Bitmap photo = BitmapFactory.decodeStream(photo_url.openConnection().getInputStream());
-                                    Asset asset = createAssetFromBitmap(photo);
-                                    WearMsgService.sendAssets("/image",asset);
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-
-                            }
 
 
-                        }
                     }
                 }, new Response.ErrorListener() {
             @Override
