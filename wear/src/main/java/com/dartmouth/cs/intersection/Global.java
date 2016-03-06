@@ -11,6 +11,7 @@ public class Global {
 
     public static boolean GACConnected = false;
 
+    public final static String RESET = "/default";
     public final static String FB_CONNECTED = "/fbconnected";
     public final static String VIBRATE = "/vibrate";
     public final static String FEATURES = "/feature";

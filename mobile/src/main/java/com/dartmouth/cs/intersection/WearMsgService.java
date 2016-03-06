@@ -266,10 +266,10 @@ public class WearMsgService extends WearableListenerService implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        Global.GACConnected = true;
+        /*Global.GACConnected = true;
 
         Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
-        sendBroadcast(intent);
+        sendBroadcast(intent);*/
     }
 
     @Override

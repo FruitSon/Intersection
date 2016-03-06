@@ -12,6 +12,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
 
+import com.dartmouth.cs.intersection.BindFBActivity;
 import com.dartmouth.cs.intersection.FeaturesActivity;
 import com.dartmouth.cs.intersection.Global;
 import com.dartmouth.cs.intersection.R;
@@ -98,9 +99,13 @@ public class MobileMsgService extends WearableListenerService implements
             @Override
             public void run() {
                 switch (messageEvent.getPath()){
+                    case Global.RESET:
+                        SharedPreferences sp = getSharedPreferences("settings", 0);
+                        sp.edit().clear().commit();
+                        startActivity(new Intent(getApplication(), BindFBActivity.class).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK));
+                        break;
                     case Global.FB_CONNECTED:
                         Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
-                        intent.putExtra("step", 1);
                         sendBroadcast(intent);
                         break;
 
