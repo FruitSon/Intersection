@@ -63,7 +63,7 @@ public class PollingService extends Service {
         return null;
     }
 
-    private Handler mHandler = new Handler() {
+    static private Handler mHandler = new Handler() {
         public void handleMessage (Message msg) {
             switch(msg.what) {
                 case MSG_SUCCESS:
@@ -125,9 +125,10 @@ public class PollingService extends Service {
 
                     }
                 }, new Response.ErrorListener() {
+
             @Override
             public void onErrorResponse(VolleyError error) {
-                System.out.println(error);
+                error.printStackTrace();
             }
         });
 

@@ -75,7 +75,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
         List<String> permissionNeeds = Arrays.asList("user_about_me", "user_actions.books",
                 "user_actions.music", "user_education_history", "user_games_activity",
                 "user_hometown", "user_location", "user_tagged_places", "user_work_history",
-                "user_photos", "public_profile");
+                "user_photos", "public_profile","user_likes");
         mLoginButton.setReadPermissions(permissionNeeds);
 
         mLoginButton.registerCallback(mCallbackManager, new FacebookCallback<LoginResult>() {
@@ -88,7 +88,8 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                 try {
                     userINFO.put("FacebookID","");
                     userINFO.put("AccessToken","");
-                    userINFO.put("Installed App",new JSONArray());
+//                    userINFO.put("Installed App",new JSONArray());
+                    userINFO.put("app",new JSONArray());
                     userINFO.put("photo URL","");
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -141,7 +142,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                 try {
                     userINFO.put("FacebookID", mAccessToken.getUserId());
                     userINFO.put("AccessToken", mAccessToken.getToken());
-                    userINFO.put("Installed App", appList);
+//                    userINFO.put("Installed App", appList);
 
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -210,8 +211,15 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                             @Override
                                                             public void onResponse(JSONObject response) {
 
+                                                                JSONArray jsonArray = null;
                                                                 try {
-                                                                    userINFO.put("app",response);
+                                                                    jsonArray = response.getJSONArray("apps");
+                                                                } catch (JSONException e) {
+                                                                    e.printStackTrace();
+                                                                }
+
+                                                                try {
+                                                                    userINFO.put("app",jsonArray.get(0));
                                                                 } catch (JSONException e) {
                                                                     e.printStackTrace();
                                                                 }
@@ -248,6 +256,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                                                 if(Global.GACConnected) {
                                                                                     WearMsgService.sendMessage("/fbconnected", "mobile msg");
                                                                                 }
+
                                                                                 //start update GPS service to server
                                                                                 GPSscheduler.setSchedule(getApplicationContext());
 
@@ -311,7 +320,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
         AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
             @Override
             protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
-                if(currentAccessToken == null) WearMsgService.sendMessage("/reset","reset");
+                if(currentAccessToken == null) WearMsgService.sendMessage("/default","reset");
             }
         };
 
