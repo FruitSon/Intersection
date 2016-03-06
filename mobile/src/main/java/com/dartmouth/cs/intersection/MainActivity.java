@@ -324,12 +324,12 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
     protected void onResume(){
         super.onResume();
 
-//        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
-//            @Override
-//            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
-//                if(currentAccessToken == null) WearMsgService.sendMessage("/default","reset");
-//            }
-//        };
+        AccessTokenTracker accessTokenTracker = new AccessTokenTracker() {
+            @Override
+            protected void onCurrentAccessTokenChanged(AccessToken oldAccessToken, AccessToken currentAccessToken) {
+                if(currentAccessToken == null) WearMsgService.sendMessage("/default","reset");
+            }
+        };
 
 //        //read access token from storage
 //        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo",MODE_PRIVATE);
