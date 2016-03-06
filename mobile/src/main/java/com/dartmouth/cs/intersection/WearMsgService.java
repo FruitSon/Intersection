@@ -1,14 +1,12 @@
 package com.dartmouth.cs.intersection;
 
 import android.app.Notification;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.CountDownTimer;
-import android.os.Vibrator;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
@@ -121,8 +119,8 @@ public class WearMsgService extends WearableListenerService implements
     public void onMessageReceived(final MessageEvent messageEvent) {
 
 
-        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
-        v.vibrate(1000);
+//        Vibrator v = (Vibrator) this.getSystemService(Context.VIBRATOR_SERVICE);
+//        v.vibrate(1000);
 
 
         new Thread(new Runnable() {
@@ -149,7 +147,7 @@ public class WearMsgService extends WearableListenerService implements
                                 + user_id + "/"+ res;
                         break;
                     case "/willing":
-                        url = "http://intersectionserver-1232.appspot.com/admin/set_willing/"
+                        url = "http://intersectionserver-1232.appspot.com/set_willing/"
                                 + user_id + "/"+ res;
                         break;
                     case "/req_score":
