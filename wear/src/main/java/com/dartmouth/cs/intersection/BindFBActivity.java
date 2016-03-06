@@ -52,11 +52,9 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
     public class GACConnectedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            int step = intent.getIntExtra("step", 0);
-            if(step == 1){
-                startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
-                finish();
-            }
+            startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
+            finish();
+
         }
     }
 }
