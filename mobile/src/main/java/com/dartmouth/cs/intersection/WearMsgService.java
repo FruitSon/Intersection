@@ -30,6 +30,7 @@ import com.google.android.gms.wearable.WearableListenerService;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Calendar;
 
 /**
@@ -44,6 +45,7 @@ public class WearMsgService extends WearableListenerService implements
     private static final String START_ACTIVITY = "/connected";
 
     private static GoogleApiClient mGoogleApiClient;
+
 
 
     @Override
@@ -123,6 +125,7 @@ public class WearMsgService extends WearableListenerService implements
 //        v.vibrate(1000);
 
 
+        ArrayList<String> other_id = new ArrayList<String>();
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -154,11 +157,11 @@ public class WearMsgService extends WearableListenerService implements
                         url = "http://intersectionserver-1232.appspot.com/others_to_grade/"
                                 + user_id + "/3";
                         break;
-                    //// TODO: 接收打分结果
+                    //// TODO: 接收打分结果,get user id
                     case "/get_score":
-                        url = "http://intersectionserver-1232.appspot.com/others_to_grade/"
-                                + user_id + "/"+res;
-
+                        String other_id =null;
+                        url = "http://intersectionserver-1232.appspot.com/grade_other/"
+                                + user_id + "/"+ other_id+"/"+res;
                         break;
                     //// TODO: 上传录音结果
                     case "/update_audio":
@@ -176,7 +179,7 @@ public class WearMsgService extends WearableListenerService implements
                                     @Override
                                     public void onResponse(String response) {
                                         if(messageEvent.getPath().equals("/req_score")){
-                                            sendMessage("/info_score",response);
+                                            sendMessage("/info_score", response);
                                         }
                                     }
                                 }, new Response.ErrorListener() {
