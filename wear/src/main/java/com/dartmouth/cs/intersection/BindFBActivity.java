@@ -6,15 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.wearable.activity.WearableActivity;
-import android.util.Log;
 
-import com.dartmouth.cs.intersection.service.MobileMsgService;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Wearable;
-
-import org.json.JSONObject;
-
-import java.io.UnsupportedEncodingException;
 
 /**
  * Created by _ReacTor on 16/2/22.
@@ -24,6 +17,7 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
 
     private GoogleApiClient mApiClient;
     private Context mContext;
+    private int first_time = 0;
 
     private GACConnectedReceiver gacConnReceiver;
 
@@ -52,8 +46,11 @@ public class BindFBActivity extends WearableActivity /*implements GoogleApiClien
     public class GACConnectedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context ctx, Intent intent) {
-            startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
-            finish();
+            if(first_time != 1) {
+                first_time = 1;
+                startActivity(new Intent(BindFBActivity.this, FeaturesActivity.class));
+                finish();
+            }
         }
     }
 }

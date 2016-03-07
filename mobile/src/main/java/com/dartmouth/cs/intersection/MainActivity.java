@@ -267,8 +267,8 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                                                  //start update GPS service to server
                                                                                 GPSscheduler.setSchedule(getApplicationContext());
 
-                                                                                //start querying server, every 10 s
-                                                                                POLLINGscheduler.setSchedule(getApplicationContext(),60000);
+                                                                                //start querying server, every 20 s
+                                                                                POLLINGscheduler.setSchedule(getApplicationContext(),20000);
 
                                                                             }
                                                                         }, new Response.ErrorListener() {

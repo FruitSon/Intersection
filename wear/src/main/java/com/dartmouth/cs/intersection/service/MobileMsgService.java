@@ -13,6 +13,7 @@ import android.util.Log;
 import com.dartmouth.cs.intersection.BindFBActivity;
 import com.dartmouth.cs.intersection.FeaturesActivity;
 import com.dartmouth.cs.intersection.Global;
+import com.dartmouth.cs.intersection.MainFragment;
 import com.dartmouth.cs.intersection.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -35,6 +36,8 @@ public class MobileMsgService extends WearableListenerService implements
     private static final String TAG = "WEAR_LISTENER";
 
     private static GoogleApiClient mGoogleApiClient;
+
+    private static int matched_people = 0;
 
     @Override
     public void onCreate() {
@@ -103,9 +106,7 @@ public class MobileMsgService extends WearableListenerService implements
                         break;
 
                     case Global.VIBRATE:
-                        SharedPreferences sp2 = getSharedPreferences("settings", 0);
-                        int curStep = sp2.getInt("SettingSteps", 0);
-                        if (curStep == 4){
+
                         int notificationId = 001;
                         String EXTRA_EVENT_ID = "1";
                         int eventId = 2;
@@ -119,7 +120,7 @@ public class MobileMsgService extends WearableListenerService implements
 
                         String eventLocation = "within 10 meters from you";
                         // Build intent for notification content
-                        Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
+                        Intent viewIntent = new Intent(getApplicationContext(), MainFragment.class);
                         viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
                         PendingIntent viewPendingIntent =
                                 PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
@@ -127,18 +128,23 @@ public class MobileMsgService extends WearableListenerService implements
 
                         //// TODO: 3/6/16 有图
 
-                        Bitmap bitmap = BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.liluyang);
+                        Bitmap liluyang = BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.liluyang);
                         NotificationCompat.BigPictureStyle bigStyle = new NotificationCompat.BigPictureStyle();
-                        bigStyle.bigPicture(bitmap);
+
+                        String name = new String(messageEvent.getData());
+                        if(name.equals("Weichen Wang")) {
+                            bigStyle.bigPicture(BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.wangweichen));
+                        }
+                        else bigStyle.bigPicture(liluyang);
 
                         NotificationCompat.Builder notificationBuilder =
                                 new NotificationCompat.Builder(getApplicationContext())
-                                        .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
+                                        .setSmallIcon(R.drawable.icon)
                                         .setContentTitle(eventTitle)
                                         .setContentText(eventLocation)
                                         .setStyle(bigStyle)
                                         .setContentIntent(viewPendingIntent)
-                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
+                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000});
 
                         // Get an instance of the NotificationManager service
                         NotificationManagerCompat notificationManager =
@@ -146,22 +152,6 @@ public class MobileMsgService extends WearableListenerService implements
                         notificationManager.notify(notificationId, notificationBuilder.build());
 
 
-//                        //// TODO: 无图
-//                                                NotificationCompat.Builder notificationBuilder =
-//                                new NotificationCompat.Builder(getApplicationContext())
-//                                        .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
-//                                        .setContentTitle(eventTitle)
-//                                        .setContentText(eventLocation)
-//                                        .setContentIntent(viewPendingIntent)
-//                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
-//                        // Build the notification and issues it with notification manager.
-//                        // Get an instance of the NotificationManager service
-//                        NotificationManagerCompat notificationManager =
-//                                NotificationManagerCompat.from(getApplicationContext());
-//                        notificationManager.notify(notificationId, notificationBuilder.build());
-//
-//                        notificationManager.notify(notificationId, notificationBuilder.build());
-                    }
                         break;
 
                     case Global.INFO_SCORE:
@@ -262,9 +252,9 @@ public class MobileMsgService extends WearableListenerService implements
 
     @Override
     public void onConnected(Bundle bundle) {
-        /*Global.GACConnected = true;
+        Global.GACConnected = true;
 
-        Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
+        /*Intent intent = new Intent(Global.GAC_BROADCAST_FILTER);
         sendBroadcast(intent);*/
     }
 

@@ -40,7 +40,7 @@ public class PollingService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        new CountDownTimer(30000,1000) {
+        new CountDownTimer(10000,1000) {
             @Override
             public void onTick(long millisUntilFinished) {
             }
@@ -104,10 +104,11 @@ public class PollingService extends Service {
                             JSONObject result = new JSONObject(response);
                             is_matched = result.get("is_matched").toString();
                             name = result.get("name").toString();
-                            if((is_matched.equals("true")==true) && (name.equals(previousname)==false)) {
+                            if((is_matched.equals("true")==true)) {
 
                                     WearMsgService.sendMessage("/vibrate", name);
                                     previousname = name;
+
 
 //                                photo_url = new URL(result.get("photo_url").toString());
 //

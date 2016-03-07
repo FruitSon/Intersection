@@ -124,14 +124,16 @@ public class WearMsgService extends WearableListenerService implements
                 String url = null;
                 String res = new String(messageEvent.getData(), StandardCharsets.UTF_8);
 
+                System.out.println("urllllll+:"+messageEvent.getPath());
+
                 switch (messageEvent.getPath()) {
                     case "/pairopen":
-                        url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
+                        if(new String(messageEvent.getData()).equals("on"))
+                            url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
                                 + user_id + "/1";
-                        break;
-                    case "/logged":
-                        url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
-                                + user_id + "/1";
+                        else
+                            url = "http://intersectionserver-1232.appspot.com/admin/set_vibrate/"
+                                    + user_id + "/0";
                         break;
                     case "/feature":
                         url = "http://intersectionserver-1232.appspot.com/set_features/"

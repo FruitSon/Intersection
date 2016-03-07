@@ -41,8 +41,8 @@ public class GPSService extends Service implements LocationListener{
     public void onCreate() {
         super.onCreate();
         curLocation = getLocation();
+        System.out.println("location:" + curLocation.toString());
 
-        System.out.println("location:"+curLocation.toString());
 
         //send to server
         longitude = curLocation.getLongitude();
@@ -72,12 +72,17 @@ public class GPSService extends Service implements LocationListener{
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        curLocation = getLocation();
-        System.out.println("location:"+curLocation.toString());
+        if(getLocation()!=null) {
+            curLocation = getLocation();
+            System.out.println("location:" + curLocation.toString());
 
-        //send to server
-        longitude = curLocation.getLongitude();
-        latitude = curLocation.getLatitude();
+            //send to server
+            longitude = curLocation.getLongitude();
+            latitude = curLocation.getLatitude();
+        }else{
+            latitude = 43.706432;
+            longitude = -72.288974;
+        }
 
         SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
         String user_id = sharedPreferences.getString("user_id", "-1");
@@ -128,7 +133,7 @@ public class GPSService extends Service implements LocationListener{
                     lm.requestLocationUpdates(LocationManager.NETWORK_PROVIDER,
                             INTERVAL, DISTANCE, this);
                     Log.d("Network", "Network");
-                    location_n = lm.getLastKnownLocation(LocationManager.GPS_PROVIDER);
+                    location_n = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
                 }
             }
 
