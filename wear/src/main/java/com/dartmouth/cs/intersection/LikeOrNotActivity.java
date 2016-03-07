@@ -129,7 +129,7 @@ public class LikeOrNotActivity extends WearableActivity {
         System.out.println(temp);
         MobileMsgService.sendMessage(Global.GET_SCORE, temp);
 
-        if(userCount%3==2){
+        if(userCount%3==0){
             if(settingStep<4){
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putInt("SettingSteps", 4);
