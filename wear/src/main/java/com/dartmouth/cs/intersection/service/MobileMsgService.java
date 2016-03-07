@@ -1,13 +1,11 @@
 package com.dartmouth.cs.intersection.service;
 
-import android.app.Notification;
 import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.NotificationManagerCompat;
 import android.util.Log;
@@ -18,22 +16,15 @@ import com.dartmouth.cs.intersection.Global;
 import com.dartmouth.cs.intersection.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.wearable.Asset;
-import com.google.android.gms.wearable.DataEvent;
-import com.google.android.gms.wearable.DataEventBuffer;
-import com.google.android.gms.wearable.DataMapItem;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.MessageEvent;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
-import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 import com.google.android.gms.wearable.WearableListenerService;
 
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
 
 /**
  * Created by _ReacTor on 16/2/28.
@@ -96,6 +87,8 @@ public class MobileMsgService extends WearableListenerService implements
     @Override
     public void onMessageReceived(final MessageEvent messageEvent) {
         new Thread(new Runnable() {
+            String path = messageEvent.getPath();
+
             @Override
             public void run() {
                 switch (messageEvent.getPath()){
@@ -110,39 +103,65 @@ public class MobileMsgService extends WearableListenerService implements
                         break;
 
                     case Global.VIBRATE:
-                        /*int notificationId = 001;
+                        SharedPreferences sp2 = getSharedPreferences("settings", 0);
+                        int curStep = sp2.getInt("SettingSteps", 0);
+                        if (curStep == 4){
+                        int notificationId = 001;
                         String EXTRA_EVENT_ID = "1";
                         int eventId = 2;
                         byte[] bb = messageEvent.getData();
                         String eventTitle = "";
                         try {
-                            eventTitle =  new String(bb, "UTF-8");
+                            eventTitle = new String(bb, "UTF-8");
                         } catch (UnsupportedEncodingException e) {
                             e.printStackTrace();
                         }
 
-                        String eventLocation = "Hello";
+                        String eventLocation = "within 10 meters from you";
                         // Build intent for notification content
                         Intent viewIntent = new Intent(getApplicationContext(), FeaturesActivity.class);
                         viewIntent.putExtra(EXTRA_EVENT_ID, eventId);
                         PendingIntent viewPendingIntent =
                                 PendingIntent.getActivity(getApplicationContext(), 0, viewIntent, 0);
 
-                        *//*NotificationCompat.Builder notificationBuilder =
+
+                        //// TODO: 3/6/16 有图
+
+                        Bitmap bitmap = BitmapFactory.decodeResource(getApplicationContext().getResources(), R.drawable.liluyang);
+                        NotificationCompat.BigPictureStyle bigStyle = new NotificationCompat.BigPictureStyle();
+                        bigStyle.bigPicture(bitmap);
+
+                        NotificationCompat.Builder notificationBuilder =
                                 new NotificationCompat.Builder(getApplicationContext())
                                         .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
                                         .setContentTitle(eventTitle)
                                         .setContentText(eventLocation)
+                                        .setStyle(bigStyle)
                                         .setContentIntent(viewPendingIntent)
-                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});*//*
+                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
 
                         // Get an instance of the NotificationManager service
                         NotificationManagerCompat notificationManager =
                                 NotificationManagerCompat.from(getApplicationContext());
+                        notificationManager.notify(notificationId, notificationBuilder.build());
 
-                        // Build the notification and issues it with notification manager.
-                        //notificationManager.notify(notificationId, notificationBuilder.build());
-                        notificationManager.notify(notificationId, createNotification().build());*/
+
+//                        //// TODO: 无图
+//                                                NotificationCompat.Builder notificationBuilder =
+//                                new NotificationCompat.Builder(getApplicationContext())
+//                                        .setSmallIcon(R.drawable.common_google_signin_btn_icon_light_normal)
+//                                        .setContentTitle(eventTitle)
+//                                        .setContentText(eventLocation)
+//                                        .setContentIntent(viewPendingIntent)
+//                                        .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000});
+//                        // Build the notification and issues it with notification manager.
+//                        // Get an instance of the NotificationManager service
+//                        NotificationManagerCompat notificationManager =
+//                                NotificationManagerCompat.from(getApplicationContext());
+//                        notificationManager.notify(notificationId, notificationBuilder.build());
+//
+//                        notificationManager.notify(notificationId, notificationBuilder.build());
+                    }
                         break;
 
                     case Global.INFO_SCORE:
@@ -178,67 +197,67 @@ public class MobileMsgService extends WearableListenerService implements
     }
 
 
-    @Override
-    public void onDataChanged(DataEventBuffer dataEvents) {
-        super.onDataChanged(dataEvents);
-
-        for (DataEvent event : dataEvents) {
-            if (event.getType() == DataEvent.TYPE_CHANGED &&
-                    event.getDataItem().getUri().getPath().equals("/image")) {
-                PutDataRequest dataRequest = PutDataRequest.createFromDataItem(event.getDataItem());
-                Asset profileAsset = dataRequest.getAsset("image");
-
-                final Bitmap bitmap = loadBitmapFromAsset(profileAsset);
-
-                int seconds = Calendar.getInstance().get(Calendar.SECOND);
-                int pending ;
-                if(seconds<30) pending = 30-seconds;
-                else pending = 60 - seconds;
-                new CountDownTimer(pending*1000, 1000) {
-                    public void onFinish() {
-                        createNotification(bitmap);
-                    }
-
-                    public void onTick(long millisUntilFinished) {
-                    }
-                }.start();
-
-            }
-        }
-    }
-
-    public Bitmap loadBitmapFromAsset(Asset asset) {
-        if (asset == null) {
-            throw new IllegalArgumentException("Asset must be non-null");
-        }
-        if(!mGoogleApiClient.isConnected()){
-            return null;
-        }
-        // convert asset into a file descriptor and block until it's ready
-        InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
-                mGoogleApiClient, asset).await().getInputStream();
-
-        if (assetInputStream == null) {
-            Log.w(TAG, "Requested an unknown Asset.");
-            return null;
-        }
-        // decode the stream into a bitmap
-        return BitmapFactory.decodeStream(assetInputStream);
-    }
+//    @Override
+//    public void onDataChanged(DataEventBuffer dataEvents) {
+//        super.onDataChanged(dataEvents);
+//
+//        for (DataEvent event : dataEvents) {
+//            if (event.getType() == DataEvent.TYPE_CHANGED &&
+//                    event.getDataItem().getUri().getPath().equals("/image")) {
+//                PutDataRequest dataRequest = PutDataRequest.createFromDataItem(event.getDataItem());
+//                Asset profileAsset = dataRequest.getAsset("image");
+//
+//                final Bitmap bitmap = loadBitmapFromAsset(profileAsset);
+//
+//                int seconds = Calendar.getInstance().get(Calendar.SECOND);
+//                int pending ;
+//                if(seconds<30) pending = 30-seconds;
+//                else pending = 60 - seconds;
+//                new CountDownTimer(pending*1000, 1000) {
+//                    public void onFinish() {
+//                        createNotification(bitmap);
+//                    }
+//
+//                    public void onTick(long millisUntilFinished) {
+//                    }
+//                }.start();
+//
+//            }
+//        }
+//    }
+//
+//    public Bitmap loadBitmapFromAsset(Asset asset) {
+//        if (asset == null) {
+//            throw new IllegalArgumentException("Asset must be non-null");
+//        }
+//        if(!mGoogleApiClient.isConnected()){
+//            return null;
+//        }
+//        // convert asset into a file descriptor and block until it's ready
+//        InputStream assetInputStream = Wearable.DataApi.getFdForAsset(
+//                mGoogleApiClient, asset).await().getInputStream();
+//
+//        if (assetInputStream == null) {
+//            Log.w(TAG, "Requested an unknown Asset.");
+//            return null;
+//        }
+//        // decode the stream into a bitmap
+//        return BitmapFactory.decodeStream(assetInputStream);
+//    }
 
     //Create a BigPictureStyle notification that displays the image.
-    private Notification createNotification(Bitmap image) {
-        NotificationCompat.BigPictureStyle bigPictureStyle
-                = new NotificationCompat.BigPictureStyle()
-                .bigPicture(image);
-        return new NotificationCompat.Builder(this)
-                .setContentTitle("Image Received")
-                .setContentText("")
-                .setSmallIcon(R.drawable.icon)
-                .setStyle(bigPictureStyle)
-                .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
-                .build();
-    }
+//    private Notification createNotification(Bitmap image) {
+//        NotificationCompat.BigPictureStyle bigPictureStyle
+//                = new NotificationCompat.BigPictureStyle()
+//                .bigPicture(image);
+//        return new NotificationCompat.Builder(this)
+//                .setContentTitle("Image Received")
+//                .setContentText("")
+//                .setSmallIcon(R.drawable.icon)
+//                .setStyle(bigPictureStyle)
+//                .setVibrate(new long[]{1000, 1000, 1000, 1000, 1000})
+//                .build();
+//    }
 
 
     @Override

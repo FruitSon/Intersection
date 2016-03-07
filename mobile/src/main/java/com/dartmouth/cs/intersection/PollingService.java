@@ -4,23 +4,18 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
-import android.os.Handler;
+import android.os.CountDownTimer;
 import android.os.IBinder;
-import android.os.Message;
 import android.support.annotation.Nullable;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
-import com.google.android.gms.wearable.Asset;
 
 import org.json.JSONObject;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.net.URL;
 
 
@@ -34,6 +29,7 @@ public class PollingService extends Service {
     private static final int MSG_SUCCESS = 0;
     private static final int MSG_FAIL = 1;
 
+    private String previousname = "";
 
 
     public PollingService( ) {
@@ -44,9 +40,19 @@ public class PollingService extends Service {
     public void onCreate() {
         super.onCreate();
 
-        SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
-        String user_id = sharedPreferences.getString("user_id", "-1");
-        polling(user_id);
+        new CountDownTimer(30000,1000) {
+            @Override
+            public void onTick(long millisUntilFinished) {
+            }
+
+            @Override
+            public void onFinish() {
+                SharedPreferences sharedPreferences = getSharedPreferences("UserInfo", MODE_WORLD_READABLE);
+                String user_id = sharedPreferences.getString("user_id", "-1");
+                polling(user_id);
+            }
+
+        }.start();
 
     }
 
@@ -66,26 +72,26 @@ public class PollingService extends Service {
         return null;
     }
 
-    static private Handler mHandler = new Handler() {
-        public void handleMessage (Message msg) {
-            switch(msg.what) {
-                case MSG_SUCCESS:
-                    Bundle received = (Bundle) msg.obj;
-                    Bitmap image = received.getParcelable("image");
-                    String n = received.getString("name");
-                    Asset asset = createAssetFromBitmap(image);
-                    WearMsgService.sendMessage("/vibrate",n);
-                    WearMsgService.sendAssets("/image", asset);
-
-                    break;
-
-                //没有图片- -
-                case MSG_FAIL:
-//                  WearMsgService.sendMessage("/vibrate", name);
-                    break;
-            }
-        }
-    };
+//    static private Handler mHandler = new Handler() {
+//        public void handleMessage (Message msg) {
+//            switch(msg.what) {
+//                case MSG_SUCCESS:
+//                    Bundle received = (Bundle) msg.obj;
+//                    Bitmap image = received.getParcelable("image");
+//                    String n = received.getString("name");
+//                    Asset asset = createAssetFromBitmap(image);
+//                    WearMsgService.sendMessage("/vibrate",n);
+//                    WearMsgService.sendAssets("/image", asset);
+//
+//                    break;
+//
+//                //没有图片- -
+//                case MSG_FAIL:
+////                  WearMsgService.sendMessage("/vibrate", name);
+//                    break;
+//            }
+//        }
+//    };
 
     public void polling(String id){
         String Pollingurl = "http://intersectionserver-1232.appspot.com/is_matched/"+id;
@@ -93,38 +99,40 @@ public class PollingService extends Service {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        System.out.println("server response"+response);
+                        System.out.println("server response" + response);
                         try {
                             JSONObject result = new JSONObject(response);
                             is_matched = result.get("is_matched").toString();
-                            if(is_matched == "true") {
-                                name = result.get("name").toString();
-                                photo_url = new URL(result.get("photo_url").toString());
+                            name = result.get("name").toString();
+                            if((is_matched.equals("true")==true) && (name.equals(previousname)==false)) {
 
-                                //send msg to watch if is matched
-                                new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if(photo_url!= null){
-                                            try {
-                                                photo = BitmapFactory.decodeStream(photo_url.openConnection().getInputStream());
-                                                bundle.putParcelable("image",photo);
-                                                bundle.putString("name",name);
-                                                mHandler.obtainMessage(MSG_SUCCESS,bundle).sendToTarget();
-                                            } catch (IOException e) {
-                                                mHandler.obtainMessage(MSG_FAIL).sendToTarget();
-                                                e.printStackTrace();
-                                            }
+                                    WearMsgService.sendMessage("/vibrate", name);
+                                    previousname = name;
 
-                                        }
-                                    }
-                                }).start();
+//                                photo_url = new URL(result.get("photo_url").toString());
+//
+//                                //send msg to watch if is matched
+//                                new Thread(new Runnable() {
+//                                    @Override
+//                                    public void run() {
+//                                        if(photo_url!= null){
+//                                            try {
+//                                                photo = BitmapFactory.decodeStream(photo_url.openConnection().getInputStream());
+//                                                bundle.putParcelable("image",photo);
+//                                                bundle.putString("name",name);
+//                                                mHandler.obtainMessage(MSG_SUCCESS,bundle).sendToTarget();
+//                                            } catch (IOException e) {
+//                                                mHandler.obtainMessage(MSG_FAIL).sendToTarget();
+//                                                e.printStackTrace();
+//                                            }
+//
+//                                        }
+//                                    }
+//                                }).start();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
-
-
 
                     }
                 }, new Response.ErrorListener() {
@@ -138,9 +146,9 @@ public class PollingService extends Service {
         VolleySingleton.getInstance(getApplicationContext()).addToRequestQueue(matchreq);
     }
 
-    private static Asset createAssetFromBitmap(Bitmap bitmap) {
-        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
-        return Asset.createFromBytes(byteStream.toByteArray());
-    }
+//    private static Asset createAssetFromBitmap(Bitmap bitmap) {
+//        final ByteArrayOutputStream byteStream = new ByteArrayOutputStream();
+//        bitmap.compress(Bitmap.CompressFormat.PNG, 100, byteStream);
+//        return Asset.createFromBytes(byteStream.toByteArray());
+//    }
 }

@@ -162,7 +162,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                 if (response != null) {
                                     try {
                                         String imgUrl = "https://graph.facebook.com/"
-                                                + mAccessToken.getUserId() + "/picture?type=small";
+                                                + mAccessToken.getUserId() + "/picture?type=large";
                                         userINFO.put("photo URL", imgUrl);
 
 
@@ -233,9 +233,9 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
 //                                                                System.out.println("userINFO"+userINFO.toString());
 
                                                                 //send all user info to server for register
-//                                                                String serverurl =
-//                                                                        "http://intersectionserver-1232.appspot.com/register";
-                                                                String serverurl = "http://129.170.212.221:8080/register";
+                                                                String serverurl =
+                                                                        "http://intersectionserver-1232.appspot.com/register";
+//                                                                String serverurl = "http://129.170.212.221:8080/register";
                                                                 JsonObjectRequest req = new JsonObjectRequest(
                                                                         Request.Method.POST, serverurl, userINFO,
                                                                         new Response.Listener<JSONObject>() {
@@ -264,7 +264,7 @@ public class MainActivity extends AppCompatActivity /*implements MessageApi.Mess
                                                                                     WearMsgService.sendMessage("/fbconnected", "mobile msg");
                                                                                 }
 
-                                                                                //start update GPS service to server
+                                                                                 //start update GPS service to server
                                                                                 GPSscheduler.setSchedule(getApplicationContext());
 
                                                                                 //start querying server, every 10 s

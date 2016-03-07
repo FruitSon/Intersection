@@ -34,6 +34,7 @@ public class LikeOrNotActivity extends WearableActivity {
     private ArrayList<Integer> choosedFeatures = new ArrayList<>();
     private int userCount = 0;
     private JSONArray scoreUsers;
+    private ArrayList list2 = new ArrayList<>();
 
     private SharedPreferences preferences;
 
@@ -124,7 +125,9 @@ public class LikeOrNotActivity extends WearableActivity {
 
     private void sendData(String s) throws JSONException {
         userCount++;
-        MobileMsgService.sendMessage(Global.GET_SCORE, "s");
+        String temp = scoreUsers.getJSONObject(userCount).get("user_id").toString()+"/"+s.toString();
+        System.out.println(temp);
+        MobileMsgService.sendMessage(Global.GET_SCORE, temp);
 
         if(userCount%3==2){
             if(settingStep<4){
@@ -150,8 +153,10 @@ public class LikeOrNotActivity extends WearableActivity {
         // xIndex (even if from different DataSets), since no values can be
         // drawn above each other.
         ArrayList list = new ArrayList<>();
+
         Object obj = scoreData.get("similarities");
         JSONArray jsonArray = (JSONArray)obj;
+
         if (jsonArray != null) {
             int len = jsonArray.length();
             for (int i=0;i<len;i++){
